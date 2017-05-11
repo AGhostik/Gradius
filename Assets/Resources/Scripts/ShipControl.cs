@@ -4,6 +4,24 @@ using UnityEngine;
 
 public class ShipControl : MonoBehaviour {
 
+    [Header("Ship stats")]
+    [Range(0f,8f)]
+    public float speed = 1.2f;
+
+    [Header("Ship weapons")]
+    public GameObject[] Guns = new GameObject[4];
+    public GameObject[] Bullets = new GameObject[4];
+    
+    public float firerateA = 1;
+    public float firerateB = 1;
+    public float firerateX = 1;
+    public float firerateY = 1;
+    
+    private float firerateA_timer = 1;
+    private float firerateB_timer = 1;
+    private float firerateX_timer = 1;
+    private float firerateY_timer = 1;
+
     private Vector3 pos_min;
     private Vector3 pos_max;
 
@@ -21,14 +39,48 @@ public class ShipControl : MonoBehaviour {
 
         flyInput();
 
-        Debug.Log("Horizontal: " + Input.GetAxis("Horizontal") + " Vertical: " + Input.GetAxis("Vertical"));
+        shotInput();
+    }
 
-        /*
-        points_wtf[0].transform.position = pos_min;
-        points_wtf[1].transform.position = new Vector3(pos_min.x,pos_max.y,0);
-        points_wtf[2].transform.position = new Vector3(pos_max.x, pos_min.y, 0);
-        points_wtf[3].transform.position = pos_max;
-        */
+    private void shotInput()
+    {
+        if (firerateA_timer >= firerateA)
+        {
+            if (Input.GetAxisRaw("FireA") != 0)
+            {
+                Instantiate(Bullets[0]).transform.position = Guns[0].transform.position;
+                firerateA_timer = 0;
+            }
+        }
+        if (firerateB_timer >= firerateB)
+        {
+            if (Input.GetAxisRaw("FireB") != 0)
+            {
+                Instantiate(Bullets[1]).transform.position = Guns[1].transform.position;
+                firerateB_timer = 0;
+            }
+        }
+        if (firerateX_timer >= firerateX)
+        {
+            if (Input.GetAxisRaw("FireX") != 0)
+            {
+                Instantiate(Bullets[2]).transform.position = Guns[2].transform.position;
+                firerateX_timer = 0;
+            }
+        }
+        if (firerateY_timer >= firerateY)
+        {
+            if (Input.GetAxisRaw("FireY") != 0)
+            {
+                Instantiate(Bullets[3]).transform.position = Guns[3].transform.position;
+                firerateY_timer = 0;
+            }
+        }
+
+        if (firerateA_timer < firerateA) firerateA_timer += Time.deltaTime;
+        if (firerateB_timer < firerateB) firerateB_timer += Time.deltaTime;
+        if (firerateX_timer < firerateX) firerateX_timer += Time.deltaTime;
+        if (firerateY_timer < firerateY) firerateY_timer += Time.deltaTime;
     }
 
     private void flyInput()
@@ -67,6 +119,6 @@ public class ShipControl : MonoBehaviour {
             }
         }
 
-        this.transform.position += new Vector3(deltaX, deltaY, 0);
+        this.transform.position += new Vector3(deltaX * speed, deltaY * speed, 0);
     }
 }
