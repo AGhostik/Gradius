@@ -17,7 +17,7 @@ public class Projectile : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        this.transform.position += new Vector3(speed_plus / 10f + speed_mult * Time.deltaTime, 0, 0);
+        transform.position += new Vector3(speed_plus / 10f + speed_mult * Time.deltaTime, 0, 0);
 
         TTL -= Time.deltaTime;
 

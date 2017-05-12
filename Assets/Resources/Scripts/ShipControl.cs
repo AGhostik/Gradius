@@ -6,12 +6,25 @@ public class ShipControl : MonoBehaviour {
 
     [Header("Ship stats")]
     [Range(0f,8f)]
+
     public float speed = 1.2f;
 
     [Header("Ship weapons")]
-    public GameObject[] Guns = new GameObject[4];
-    public GameObject[] Bullets = new GameObject[4];
-    
+
+    public GameObject GunA;
+    public GameObject GunB;
+    public GameObject GunX;
+    public GameObject GunY;
+
+    [Header("Weapons ammunition")]
+
+    public GameObject BulletA;
+    public GameObject BulletB;
+    public GameObject BulletX;
+    public GameObject BulletY;
+
+    [Header("Weapons rate of fire")]
+
     public float firerateA = 1;
     public float firerateB = 1;
     public float firerateX = 1;
@@ -27,7 +40,6 @@ public class ShipControl : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-		
 	}
 	
 	// Update is called once per frame
@@ -48,7 +60,7 @@ public class ShipControl : MonoBehaviour {
         {
             if (Input.GetAxisRaw("FireA") != 0)
             {
-                Instantiate(Bullets[0]).transform.position = Guns[0].transform.position;
+                Instantiate(BulletA).transform.position = GunA.transform.position;
                 firerateA_timer = 0;
             }
         }
@@ -56,7 +68,7 @@ public class ShipControl : MonoBehaviour {
         {
             if (Input.GetAxisRaw("FireB") != 0)
             {
-                Instantiate(Bullets[1]).transform.position = Guns[1].transform.position;
+                Instantiate(BulletB).transform.position = GunB.transform.position;
                 firerateB_timer = 0;
             }
         }
@@ -64,7 +76,7 @@ public class ShipControl : MonoBehaviour {
         {
             if (Input.GetAxisRaw("FireX") != 0)
             {
-                Instantiate(Bullets[2]).transform.position = Guns[2].transform.position;
+                Instantiate(BulletX).transform.position = GunX.transform.position;
                 firerateX_timer = 0;
             }
         }
@@ -72,7 +84,7 @@ public class ShipControl : MonoBehaviour {
         {
             if (Input.GetAxisRaw("FireY") != 0)
             {
-                Instantiate(Bullets[3]).transform.position = Guns[3].transform.position;
+                Instantiate(BulletY).transform.position = GunY.transform.position;
                 firerateY_timer = 0;
             }
         }
@@ -92,13 +104,13 @@ public class ShipControl : MonoBehaviour {
 
         if (inputX < 0)
         {
-            if (this.transform.position.x > pos_min.x)
+            if (transform.position.x > pos_min.x)
             {
                 deltaX = inputX * Time.deltaTime;
             }
         } else
         {
-            if (this.transform.position.x < pos_max.x)
+            if (transform.position.x < pos_max.x)
             {
                 deltaX = inputX * Time.deltaTime;
             }
@@ -106,19 +118,19 @@ public class ShipControl : MonoBehaviour {
 
         if (inputY < 0)
         {
-            if (this.transform.position.y > pos_min.y)
+            if (transform.position.y > pos_min.y)
             {
                 deltaY = inputY * Time.deltaTime;
             }
         }
         else
         {
-            if (this.transform.position.y < pos_max.y)
+            if (transform.position.y < pos_max.y)
             {
                 deltaY = inputY * Time.deltaTime;
             }
         }
 
-        this.transform.position += new Vector3(deltaX * speed, deltaY * speed, 0);
+        transform.position += new Vector3(deltaX * speed, deltaY * speed, 0);
     }
 }
