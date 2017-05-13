@@ -40,20 +40,23 @@ public class UIhelper
     }
 
     //var
-    private float scale = 1f;
+    protected float scale = 1f;
 
     private int screen_width = 1;
     private int screen_height = 1;
     //
     
-
+    public Image image(Texture txt)
+    {
+        return new Image(txt, scale);
+    }
 
     //get-set
-    public float getScaleMultiplier()
+    public float get_ScaleMultiplier()
     {
         return scale;
     }
-    public void setScaleMultiplier(float new_scale)
+    public void set_ScaleMultiplier(float new_scale)
     {
         if (new_scale > 0)
         {
@@ -61,25 +64,61 @@ public class UIhelper
         }
     }
 
-    public int getScreenWidth_int()
+    public int get_ScreenWidth()
     {
         return screen_width;
     }
-    public int getScreenHeight_int()
+    public int get_ScreenHeight()
     {
         return screen_height;
     }
 
-    public float getScreenWidth()
+    /// <summary>
+    /// Draw 4-side border and progres-line within, cropped by percentage
+    /// </summary>
+    public void ProgresbarDraw(Texture border, Texture lineWithinBorder, int startX, int startY, float percent)
     {
-        return screen_width;
+        int differenceX = (border.width > lineWithinBorder.width ? ((border.width - lineWithinBorder.width) / 2) : 0);
+        int differenceY = (border.height > lineWithinBorder.height ? ((border.height - lineWithinBorder.height) / 2) : 0);
+
+        Image bord = new Image(border, scale);
+        Image lin = new Image(lineWithinBorder, scale);
+
+        bord.Draw(startX, startY);
+
+        lin.DrawPartially(startX + differenceX, startY + differenceY, percent);
     }
-    public float getScreenHeight()
+
+    public void ProgresbarDraw(Texture border, Texture lineWithinBorder, int startX, int startY, float percent, bool horizontal = true, bool vertical = false)
     {
-        return screen_height;
-    }    
-  
-    public void TextureDraw(Texture texture, float startX, float startY)
+        int differenceX = (border.width > lineWithinBorder.width ? ((border.width - lineWithinBorder.width) / 2) : 0);
+        int differenceY = (border.height > lineWithinBorder.height ? ((border.height - lineWithinBorder.height) / 2) : 0);
+
+        Image bord = new Image(border, scale);
+        Image lin = new Image(border, scale);
+
+        bord.Draw(startX, startY);
+
+        lin.DrawPartially(startX + differenceX, startY + differenceY, percent, horizontal, vertical);        
+    }
+}
+
+public class Image
+{
+    private Texture texture;
+    private float scale;
+
+    public Image(Texture txt, float scale_arg)
+    {
+        texture = txt;
+        scale = scale_arg;
+    }
+    ~Image() { }
+
+    /// <summary>
+    /// Draw texture at (startX;startY)
+    /// </summary>
+    public void Draw(int startX, int startY)
     {
         GUI.DrawTexture(new Rect(
             startX * scale,
@@ -89,10 +128,13 @@ public class UIhelper
             texture, ScaleMode.StretchToFill);
     }
 
-    public void TextureDrawAndResize(Texture texture, float startX, float startY, float width = 0, float height = 0)
+    /// <summary>
+    /// Draw texture at (startX;startY) with new width and height
+    /// </summary>
+    public void DrawAndResize(int startX, int startY, int width = 0, int height = 0)
     {
-        float new_width = texture.width;
-        float new_height = texture.height;
+        int new_width = texture.width;
+        int new_height = texture.height;
 
         if (width > 0)
         {
@@ -111,7 +153,10 @@ public class UIhelper
             texture, ScaleMode.StretchToFill);
     }
 
-    public void TextureDrawPartially(Texture texture, float percent, float startX, float startY)
+    /// <summary>
+    /// Draw texture at (startX;startY) and crop it by percentage
+    /// </summary>
+    public void DrawPartially(int startX, int startY, float percent)
     {
         Rect pos;
         Rect texC;
@@ -126,23 +171,23 @@ public class UIhelper
 
         GUI.DrawTextureWithTexCoords(pos, texture, texC);
     }
-    public void TextureDrawPartially(Texture texture, float percent, float startX, float startY, bool horizontal, bool vertical)
+    public void DrawPartially(int startX, int startY, float percent, bool horizontal, bool vertical)
     {
         Rect pos;
         Rect texC;
-        float pos_w = texture.width;
-        float pos_h = texture.height;
+        int pos_w = texture.width;
+        int pos_h = texture.height;
         float texC_w = 1f;
         float texC_h = 1f;
 
         if (horizontal)
         {
-            pos_w = (texture.width / 100.0f * percent);
+            pos_w = (int)(texture.width / 100 * percent);
             texC_w = percent / 100;
         }
         if (vertical)
         {
-            pos_h = (texture.height / 100.0f * percent);
+            pos_h = (int)(texture.height / 100.0f * percent);
             texC_h = percent / 100;
         }
 
@@ -157,7 +202,10 @@ public class UIhelper
         GUI.DrawTextureWithTexCoords(pos, texture, texC);
     }
 
-    public void TextureDrawAndResizePartially(Texture texture, float percent, float startX, float startY, float width, float height)
+    /// <summary>
+    /// Draw texture at (startX;startY) with new width and height and crop it by percentage
+    /// </summary>
+    public void DrawAndResizePartially(int startX, int startY, int width, int height, float percent)
     {
         Rect pos;
         Rect texC;
@@ -172,23 +220,23 @@ public class UIhelper
 
         GUI.DrawTextureWithTexCoords(pos, texture, texC);
     }
-    public void TextureDrawAndResizePartially(Texture texture, float percent, float startX, float startY, float width, float height, bool horizontal, bool vertical)
+    public void DrawAndResizePartially(int startX, int startY, int width, int height, float percent, bool horizontal, bool vertical)
     {
         Rect pos;
         Rect texC;
-        float pos_w = width;
-        float pos_h = height;
+        int pos_w = width;
+        int pos_h = height;
         float texC_w = 1f;
         float texC_h = 1f;
 
         if (horizontal)
         {
-            pos_w = (width / 100.0f * percent);
+            pos_w = (int)(width / 100.0f * percent);
             texC_w = percent / 100;
         }
         if (vertical)
         {
-            pos_h = (height / 100.0f * percent);
+            pos_h = (int)(height / 100.0f * percent);
             texC_h = percent / 100;
         }
 
@@ -202,59 +250,36 @@ public class UIhelper
 
         GUI.DrawTextureWithTexCoords(pos, texture, texC);
     }
+}
 
+public class Label
+{
+    private float scale;
+    private string text;
+    private GUIStyle style;
 
-    /// <summary>
-    /// Draw 4-side border and progres-line within, cropped by percentage
-    /// </summary>
-    public void ProgresbarDraw(Texture border, Texture lineWithinBorder, float percent, float startX, float startY)
+    public Label(string label_arg, float scale_arg)
     {
-        float differenceX = (border.width > lineWithinBorder.width ? ((border.width - lineWithinBorder.width) / 2) : 0);
-        float differenceY = (border.height > lineWithinBorder.height ? ((border.height - lineWithinBorder.height) / 2) : 0);
-        
-        TextureDraw(border,
-           startX,
-           startY
-           );
+        text = label_arg;
+        scale = scale_arg;
 
-        TextureDrawPartially(lineWithinBorder,
-            percent,
-            startX + differenceX,
-            startY + differenceY
-            );
+        style = new GUIStyle();
+        style.fontSize = (int)(16 * scale);
+        style.normal.textColor = Color.white;
+        //style.font = Resources.Load("FontS") as Font;
     }
-
-    public void ProgresbarDraw(Texture border, Texture lineWithinBorder, float percent, float startX, float startY, bool horizontal = true, bool vertical = false)
-    {
-        float differenceX = (border.width > lineWithinBorder.width ? ((border.width - lineWithinBorder.width) / 2) : 0);
-        float differenceY = (border.height > lineWithinBorder.height ? ((border.height - lineWithinBorder.height) / 2) : 0);
-        
-        TextureDrawPartially(lineWithinBorder,
-            percent,
-            startX + differenceX,
-            startY + differenceY,
-            horizontal,
-            vertical
-            );
-
-        TextureDraw(border,
-            startX,
-            startY
-            );
-    }
+    ~Label() { }
 
     /// <summary>
     /// Draw text label
     /// </summary>
-    public void DrawLabel()
+    public void Draw(int startX, int startY, int width, int height)
     {
-        /*
-         * style = new GUIStyle();
-        style.fontSize =(int)( 16 * Global.gui_scale);
-        style.normal.textColor = Color.white;
-        style.font = Resources.Load("FontS") as Font;
-         * 
-         * GUI.Label(new Rect((Screen.width - 592 * Global.gui_scale)/2 + 308 * Global.gui_scale,(Screen.height - 512 * Global.gui_scale)/2 + 42 * Global.gui_scale,200 * Global.gui_scale,80 * Global.gui_scale),"Защита: " + mi.all_items[cursoritem].GetComponent<Item>().Protection, style);
-         */
+        GUI.Label(new Rect(startX, startY, width, height), text, style);
+    }
+
+    public void setStyle()
+    {
+        
     }
 }

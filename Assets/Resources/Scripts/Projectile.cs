@@ -9,12 +9,22 @@ public class Projectile : MonoBehaviour {
     public float speed_mult = 1f;
     public float TTL = 2f;
 
-	// Use this for initialization
-	void Start () {
+    public GameObject explosion;
+
+    // Use this for initialization
+    void Start () {
 	}
-	
-	// Update is called once per frame
-	void Update () {
+
+    void OnCollisionEnter2D(Collision2D col)
+    {
+        if (col.gameObject.tag == "Enemy")
+        {
+            Die();
+        }
+    }
+
+    // Update is called once per frame
+    void Update () {
 
         transform.position += new Vector3(speed_plus / 10f + speed_mult * Time.deltaTime, 0, 0);
 
@@ -22,7 +32,13 @@ public class Projectile : MonoBehaviour {
 
         if (TTL <= 0)
         {
-            Destroy(gameObject);
+            Die();
         }        
 	}
+
+    private void Die()
+    {
+        Instantiate(explosion).transform.position = gameObject.transform.position;
+        Destroy(gameObject);
+    }
 }

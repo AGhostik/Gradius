@@ -36,10 +36,10 @@ public class MoveCamera : MonoBehaviour {
     void OnGUI() {
         UIhelper drawUI = new UIhelper(256, 144);
 
-        drawUI.ProgresbarDraw(progres_border, progres_line, percent, 2, 2);        
-    }    
+        drawUI.ProgresbarDraw(progres_border, progres_line, 2, 2, percent);
+    }   
 
-    void moveTo(int finish_Point_X = 10)
+    private void moveTo(int finish_Point_X = 10)
     {
         if (transform.position.x < finish_Point_X)
         {
@@ -47,7 +47,7 @@ public class MoveCamera : MonoBehaviour {
         }
     }
 
-    void percentageCalculate(int finish_Point_X = 10)
+    private void percentageCalculate(int finish_Point_X = 10)
     {
         percent = (transform.position.x / finish_Point_X) * 100;
     }
