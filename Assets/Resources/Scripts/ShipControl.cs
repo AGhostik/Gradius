@@ -4,8 +4,14 @@ using UnityEngine;
 
 public class ShipControl : MonoBehaviour {
 
+    [Header("Ship appearance")]
+
+    public Sprite NormalSprite;
+    public Sprite UpSprite;
+    public Sprite DownSprite;    
+
     [Header("Ship stats")]
-    [Range(0f,8f)]
+    [Range(0f,5f)]
 
     public float speed = 1.2f;
 
@@ -97,11 +103,11 @@ public class ShipControl : MonoBehaviour {
 
     private void flyInput()
     {
-        float inputX = Input.GetAxis("Horizontal");
-        float inputY = Input.GetAxis("Vertical");
+        float inputX = Input.GetAxis("Horizontal") * 3;
+        float inputY = Input.GetAxis("Vertical") * 3;
 
         float deltaX = 0, deltaY = 0;
-
+        string x = string.Format("{0}","a");
         if (inputX < 0)
         {
             if (transform.position.x > pos_min.x)
@@ -131,6 +137,28 @@ public class ShipControl : MonoBehaviour {
             }
         }
 
+        changeSprite(deltaY);
+
         transform.position += new Vector3(deltaX * speed, deltaY * speed, 0);
+    }
+
+    private void changeSprite(float vertical)
+    {
+        if (UpSprite != null && DownSprite != null)
+        {
+            if (vertical < -0.01f)
+            {
+                gameObject.GetComponent<SpriteRenderer>().sprite = DownSprite;
+            }
+            else
+            if (vertical > 0.01f)
+            {
+                gameObject.GetComponent<SpriteRenderer>().sprite = UpSprite;
+            }
+            else
+            {
+                gameObject.GetComponent<SpriteRenderer>().sprite = NormalSprite;
+            }
+        }
     }
 }

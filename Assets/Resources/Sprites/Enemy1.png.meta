@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 8d9622e42ee9d65438f0bf57e43ca6c0
-timeCreated: 1494607527
+timeCreated: 1494678592
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -82,7 +82,7 @@ TextureImporter:
         width: 15
         height: 15
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
@@ -90,12 +90,12 @@ TextureImporter:
       name: Enemy1_1
       rect:
         serializedVersion: 2
-        x: 23
+        x: 15
         y: 0
         width: 15
         height: 15
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
@@ -103,12 +103,12 @@ TextureImporter:
       name: Enemy1_2
       rect:
         serializedVersion: 2
-        x: 44
+        x: 30
         y: 0
         width: 15
         height: 15
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0
@@ -116,12 +116,12 @@ TextureImporter:
       name: Enemy1_3
       rect:
         serializedVersion: 2
-        x: 67
+        x: 45
         y: 0
         width: 15
         height: 15
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       tessellationDetail: 0

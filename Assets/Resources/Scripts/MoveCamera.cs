@@ -34,9 +34,9 @@ public class MoveCamera : MonoBehaviour {
 	}   
 
     void OnGUI() {
-        UIhelper drawUI = new UIhelper(1280, 720);
+        UIhelper drawUI = new UIhelper(256, 144);
 
-        drawUI.ProgresbarDraw(progres_border, progres_line, percent, 10, 10, 5);
+        drawUI.ProgresbarDraw(progres_border, progres_line, percent, 2, 2);        
     }    
 
     void moveTo(int finish_Point_X = 10)
