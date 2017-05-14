@@ -50,6 +50,10 @@ public class UIhelper
     {
         return new Image(txt, scale);
     }
+    public Label label(string text)
+    {
+        return new Label(text, scale);
+    }
 
     //get-set
     public float get_ScaleMultiplier()
@@ -264,7 +268,7 @@ public class Label
         scale = scale_arg;
 
         style = new GUIStyle();
-        style.fontSize = (int)(16 * scale);
+        style.fontSize = (int)(5 * scale);
         style.normal.textColor = Color.white;
         //style.font = Resources.Load("FontS") as Font;
     }
@@ -273,9 +277,9 @@ public class Label
     /// <summary>
     /// Draw text label
     /// </summary>
-    public void Draw(int startX, int startY, int width, int height)
+    public void Draw(int startX, int startY, int width = 1, int height = 1)
     {
-        GUI.Label(new Rect(startX, startY, width, height), text, style);
+        GUI.Label(new Rect(startX * scale, startY * scale, width * scale, height * scale), text, style);
     }
 
     public void setStyle()

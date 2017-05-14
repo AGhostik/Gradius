@@ -4,41 +4,70 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour {
 
-    public float damage = 5f;
+    [Header("Stats")]
+    public int damage = 5;
     public float speed_plus = 1f;
     public float speed_mult = 1f;
     public float TTL = 2f;
 
+    [Header("Direction")]
+    public bool toRight = true;
+
+    [Header("Animation after die")]
     public GameObject explosion;
+    public bool onlyHit = false;
+
+    private int direction;
 
     // Use this for initialization
     void Start () {
+        if (!toRight)
+        {
+            direction = -1;
+        }
+        else
+        {
+            direction = 1;
+        }
 	}
 
-    void OnCollisionEnter2D(Collision2D col)
+    void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.gameObject.tag == "Enemy")
+        if (toRight)
         {
-            Die();
+            if (col.gameObject.tag == "Enemy")
+            {
+                Die(true);
+            }
+        }
+        else
+        {
+            if (col.gameObject.tag == "Player")
+            {
+                Die(true);
+            }
         }
     }
 
     // Update is called once per frame
     void Update () {
 
-        transform.position += new Vector3(speed_plus / 10f + speed_mult * Time.deltaTime, 0, 0);
+        transform.position += new Vector3( (speed_plus / 10f + speed_mult * Time.deltaTime) * direction, 0, 0);
 
         TTL -= Time.deltaTime;
 
         if (TTL <= 0)
         {
-            Die();
+            Die(!onlyHit);
         }        
 	}
 
-    private void Die()
+    private void Die(bool eff)
     {
-        Instantiate(explosion).transform.position = gameObject.transform.position;
+        if (explosion != null && eff)
+        {
+            Instantiate(explosion).transform.position = gameObject.transform.position;
+        }
         Destroy(gameObject);
     }
 }

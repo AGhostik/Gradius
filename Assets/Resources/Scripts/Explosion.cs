@@ -4,21 +4,40 @@ using UnityEngine;
 
 public class Explosion : MonoBehaviour {
 
+    [Header("Stats")]
+    public float moveSpeed_multiplier = 4;
+
+    [Header("Animation")]
     public Sprite[] explosion = new Sprite[3];
 
-    private int current_frame = 0;
-    private const float timer_const = 0.05f;
-    private float timer = timer_const;
+    [Header("Direction")]
+    public bool toRight = true;
 
+    private int current_frame = 1;
+    private const float timer_const = 0.1f;
+    private float timer = timer_const;
+    private int direction;
+    private SpriteRenderer render;
 
     // Use this for initialization
     void Start () {
-		
-	}
+        render = gameObject.GetComponent<SpriteRenderer>();
+
+        if (!toRight)
+        {
+            direction = -1;
+        }
+        else
+        {
+            direction = 1;
+        }
+
+        changeFrame();
+    }
 	
 	// Update is called once per frame
 	void Update () {
-        transform.position += new Vector3(Time.deltaTime * 4, 0, 0);
+        transform.position += new Vector3(Time.deltaTime * moveSpeed_multiplier * direction, 0, 0);
         Die();
     }
 
@@ -40,6 +59,6 @@ public class Explosion : MonoBehaviour {
 
     private void changeFrame(int frame_number = 0)
     {
-        gameObject.GetComponent<SpriteRenderer>().sprite = explosion[frame_number];
+        render.sprite = explosion[frame_number];
     }
 }
