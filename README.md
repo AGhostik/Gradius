@@ -10,6 +10,13 @@ What is it? / Что это?
 
 Работу начал 10 мая 2017.
 
+Game controls / Управление
+------------
+
+Gamepad xbox: LS/DPad - move; A/X/B/Y - shot.
+
+Keyboard: W/A/S/D or Up/Left/Down/Right - move; 1/2/3/4 - shot.
+
 Download / Скачать
 ------------
 

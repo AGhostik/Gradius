@@ -83,7 +83,7 @@ public class Enemy : MonoBehaviour {
             {
                 GameObject bullet = Instantiate(Bullet);
                 bullet.transform.position = Gun.transform.position;
-                bullet.transform.SetParent(Gun.transform);
+                //bullet.transform.SetParent(Gun.transform);
                 firerate1_timer = 0;
             }
             if (firerate1_timer < firerate1) firerate1_timer += Time.deltaTime;
