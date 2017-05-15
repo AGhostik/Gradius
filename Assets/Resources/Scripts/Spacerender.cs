@@ -4,17 +4,17 @@ using UnityEngine;
 
 public class Spacerender : MonoBehaviour {
 
-    public float speed = 0.05f;
+    public float speed = 0.5f;
+
+    private Renderer render;
 
 	// Use this for initialization
 	void Start () {
-		
-	}
+        render = GetComponent<Renderer>();
+    }
 	
 	// Update is called once per frame
 	void Update () {
-        Vector2 offset = new Vector2(-1 * Time.time * speed, 0);
-
-        GetComponent<Renderer>().material.mainTextureOffset = offset;
+        render.material.mainTextureOffset = new Vector2(-1 * Time.time * speed, 0);
     }
 }

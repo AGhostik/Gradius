@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class MoveCamera : MonoBehaviour {
 
+    public float finish_posX = 100;
     public Texture progres_border;
     public Texture progres_line;
 
     private float percent;
+    private Transform thisTransform;
 
     // Use this for initialization
     void Start () {
+        thisTransform = transform;
         if (Screen.fullScreen)
         {
             Cursor.visible = false;
@@ -19,8 +22,8 @@ public class MoveCamera : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        moveTo(100);
-        percentageCalculate(100);
+        moveTo();
+        percentageCalculate();
 
         if (percent >= 100)
         {
@@ -33,22 +36,23 @@ public class MoveCamera : MonoBehaviour {
         }
 	}   
 
+    //удалить
     void OnGUI() {
         UIhelper drawUI = new UIhelper(256, 144);
 
         drawUI.ProgresbarDraw(progres_border, progres_line, 2, 2, percent);
     }   
 
-    private void moveTo(int finish_Point_X = 10)
+    private void moveTo()
     {
-        if (transform.position.x < finish_Point_X)
+        if (thisTransform.position.x < finish_posX)
         {
-            transform.position += new Vector3(Time.deltaTime, 0, 0);
+            thisTransform.position += new Vector3(Time.deltaTime, 0, 0);
         }
     }
 
-    private void percentageCalculate(int finish_Point_X = 10)
+    private void percentageCalculate()
     {
-        percent = (transform.position.x / finish_Point_X) * 100;
+        percent = (thisTransform.position.x / finish_posX) * 100;
     }
 }

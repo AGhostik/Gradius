@@ -15,9 +15,11 @@ public class Explosion : MonoBehaviour {
     private float timer_start;
     private float timer;
     private SpriteRenderer render;
+    private Transform thisTransform;
 
     // Use this for initialization
     void Start () {
+        thisTransform = transform;
         render = gameObject.GetComponent<SpriteRenderer>();
         timer_start = TTL / explosion.Length;
         timer = timer_start;
@@ -26,7 +28,7 @@ public class Explosion : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        transform.position += new Vector3(Time.deltaTime * moveSpeed_multiplier, 0, 0);
+        thisTransform.position += new Vector3(Time.deltaTime * moveSpeed_multiplier, 0, 0);
         Die();
     }
 

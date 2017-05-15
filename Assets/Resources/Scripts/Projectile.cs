@@ -15,12 +15,13 @@ public class Projectile : MonoBehaviour {
 
     [Header("Animation after die")]
     public GameObject explosion;
-    public bool onlyHit = false;
 
     private int direction;
+    private Transform thisTransform;
 
     // Use this for initialization
     void Start () {
+        thisTransform = transform;
         if (!toRight)
         {
             direction = -1;
@@ -31,42 +32,24 @@ public class Projectile : MonoBehaviour {
         }
 	}
 
-    void OnTriggerEnter2D(Collider2D col)
-    {
-        if (toRight)
-        {
-            if (col.gameObject.tag == "Enemy")
-            {
-                Die(true);
-            }
-        }
-        else
-        {
-            if (col.gameObject.tag == "Player")
-            {
-                Die(true);
-            }
-        }
-    }
-
     // Update is called once per frame
     void Update () {
 
-        transform.position += new Vector3( (speed_plus / 10f + speed_mult * Time.deltaTime) * direction, 0, 0);
+        thisTransform.position += new Vector3( (speed_plus / 10f + speed_mult * Time.deltaTime) * direction, 0, 0);
 
         TTL -= Time.deltaTime;
 
         if (TTL <= 0)
         {
-            Die(!onlyHit);
+            Die(false);
         }        
 	}
 
-    private void Die(bool eff)
+    public void Die(bool eff = true)
     {
         if (explosion != null && eff)
         {
-            Instantiate(explosion).transform.position = gameObject.transform.position;
+            Instantiate(explosion).transform.position = thisTransform.position;
         }
         Destroy(gameObject);
     }

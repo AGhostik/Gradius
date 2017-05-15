@@ -9,37 +9,25 @@ public enum AI
 
 public class Enemy : MonoBehaviour {
 
-    [Header("Stats")]
-    public int health = 100;
+    [Header("Stats")]    
     [Range(-5f, 5f)]
     public float move_speed = 0;
 
     [Header("AI type")]
     public AI ai_current;
-    public bool isShot = false;
 
     [Header("Animation")]
-    public Sprite[] frames = new Sprite[1];
-    public GameObject explosion;
-
-    [Header("Weapons")]
-    public GameObject Gun;
-
-    [Header("Ammunition")]
-    public GameObject Bullet;
-
-    [Header("Rate of fire")]
-    public float firerate1 = 1;
-
-    private float firerate1_timer = 1;
+    public Sprite[] frames = new Sprite[1];    
 
     private int current_frame = 0;
     private float timer_start;
     private float timer;
     private SpriteRenderer render;
+    private Transform thisTransform;
 
     // Use this for initialization
     void Start () {
+        thisTransform = transform;
         render = gameObject.GetComponent<SpriteRenderer>();
 
         if (ai_current == AI.Fan)
@@ -50,55 +38,12 @@ public class Enemy : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
-        if (health <= 0)
-        {
-            Die();
-        }
-
-        transform.position += new Vector3(Time.deltaTime * move_speed, 0, 0);
-        //gameObject.transform.Rotate(Vector3.forward);
+	void Update () {   
+        thisTransform.position += new Vector3(Time.deltaTime * move_speed, 0, 0);
 
         Fan();
-
-        if (isShot)
-        {
-            Shot();
-        }
     }
-
-    void OnTriggerEnter2D(Collider2D col)
-    {
-        if (col.gameObject.tag == "Projectile")
-        {
-            health -= col.gameObject.GetComponent<Projectile>().damage;
-        }
-    }
-
-    private void Shot()
-    {
-        if (Gun != null && Bullet != null)
-        {
-            if (firerate1_timer >= firerate1)
-            {
-                GameObject bullet = Instantiate(Bullet);
-                bullet.transform.position = Gun.transform.position;
-                //bullet.transform.SetParent(Gun.transform);
-                firerate1_timer = 0;
-            }
-            if (firerate1_timer < firerate1) firerate1_timer += Time.deltaTime;
-        }
-    }
-
-    private void Die()
-    {
-        if (explosion != null)
-        {
-            Instantiate(explosion).transform.position = gameObject.transform.position;
-        }
-        Destroy(gameObject);
-    }
-
+    
     private void Fan()
     {
         timer -= Time.deltaTime;
