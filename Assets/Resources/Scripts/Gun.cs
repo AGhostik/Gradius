@@ -12,13 +12,17 @@ public class Gun : MonoBehaviour {
 
     [Header("Stats")]
     public int damageUP = 0;
-    public float firerate = 1;    
+    public float firerate = 1;
+    public int shotsBetweenPause = 3;
+    public float pause_length = 0;
 
     [Header("Control")]
     public bool autoShot = true;
     public string inputAxisName = "Fire";
 
-    private float firerate1_timer = 1;
+    private float firerate1_timer = 0;
+    private float pause_timer = 0;
+    private int shot_count = 0;
 
     // Use this for initialization
     void Start () {        
@@ -41,23 +45,41 @@ public class Gun : MonoBehaviour {
     {
         if (Bullet != null)
         {
-            if (firerate1_timer >= firerate)
+            if (shot_count < shotsBetweenPause)
             {
-                GameObject bullet = Instantiate(Bullet);
-                bullet.GetComponent<Projectile>().damage += damageUP;
-
-                if (empty_startPos != null)
+                if (firerate1_timer >= firerate)
                 {
-                    bullet.transform.position = empty_startPos.transform.position;
+                    GameObject bullet = Instantiate(Bullet);
+                    bullet.GetComponent<Projectile>().damage += damageUP;
+
+                    if (empty_startPos != null)
+                    {
+                        bullet.transform.position = empty_startPos.transform.position;
+                    }
+                    else
+                    {
+                        bullet.transform.position = gameObject.transform.position;
+                    }
+                    shot_count++;
+                    firerate1_timer = 0;
+                    pause_timer = 0;
                 }
                 else
                 {
-                    bullet.transform.position = gameObject.transform.position;
+                    firerate1_timer += Time.deltaTime;
                 }
-
-                firerate1_timer = 0;
             }
-            if (firerate1_timer < firerate) firerate1_timer += Time.deltaTime;
+            else
+            {
+                if (pause_timer >= pause_length)
+                {
+                    shot_count = 0;
+                }
+                else
+                {
+                    pause_timer += Time.deltaTime;
+                }
+            }
         }
     }
 }

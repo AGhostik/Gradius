@@ -30,9 +30,6 @@ public class Destroyable : MonoBehaviour {
         {
             Die();
         }
-
-        if (objectType == Type.Player)
-            Debug.Log("Health: " + health);
     }
 
     void OnTriggerEnter2D(Collider2D col)
@@ -43,7 +40,7 @@ public class Destroyable : MonoBehaviour {
         {
             Projectile bullet = hitObject.GetComponent<Projectile>();
             health -= bullet.damage;
-            bullet.Die();
+            bullet.checkDie();
         }
     }
 

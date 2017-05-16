@@ -6,51 +6,95 @@ public class Projectile : MonoBehaviour {
 
     [Header("Stats")]
     public int damage = 5;
-    public float speed_plus = 1f;
-    public float speed_mult = 1f;
-    public float TTL = 2f;
+    public float range = 10;
+    public float speed_plus = 1;
+    public float speed_mult = 1;
+    public float TTL = 5;
+    public int pierce_count = 0;
 
     [Header("Direction")]
     public bool toRight = true;
 
-    [Header("Animation after die")]
-    public GameObject explosion;
-
-    private int direction;
+    [Header("Animation")]
+    public GameObject pierceExplosion;
+    public GameObject dieExplosion;
+    
+    private float delta_speed;
+    private Vector3 startPos;
     private Transform thisTransform;
 
     // Use this for initialization
     void Start () {
         thisTransform = transform;
+        startPos = thisTransform.position;
+        delta_speed = ((speed_plus + 1) * speed_mult) * 2;
+
         if (!toRight)
         {
-            direction = -1;
-        }
-        else
-        {
-            direction = 1;
+            delta_speed *= -1;
         }
 	}
 
     // Update is called once per frame
     void Update () {
 
-        thisTransform.position += new Vector3( (speed_plus / 10f + speed_mult * Time.deltaTime) * direction, 0, 0);
+        thisTransform.position += new Vector3( delta_speed * Time.deltaTime, 0, 0);
 
         TTL -= Time.deltaTime;
 
         if (TTL <= 0)
         {
             Die(false);
-        }        
+        }
+
+        rangeCheck();
 	}
 
-    public void Die(bool eff = true)
+    public void checkDie()
     {
-        if (explosion != null && eff)
+        if (pierce_count > 0)
         {
-            Instantiate(explosion).transform.position = thisTransform.position;
+            pierce_count--;
+            instantianeExplosion(pierceExplosion);
+        }
+        else
+        {
+            Die();
+        }
+    }
+
+    private void Die(bool eff = true)
+    {
+        if (eff)
+        {
+            instantianeExplosion(dieExplosion);
         }
         Destroy(gameObject);
+    }
+
+    private void instantianeExplosion(GameObject expl)
+    {
+        if (expl != null)
+        {
+            Instantiate(dieExplosion).transform.position = thisTransform.position;
+        }
+    }
+
+    private void rangeCheck()
+    {
+        if (toRight)
+        {
+            if (thisTransform.position.x - startPos.x >= range)
+            {
+                Die();
+            }
+        }
+        else
+        {
+            if (startPos.x - thisTransform.position.x >= range)
+            {
+                Die();
+            }
+        }
     }
 }
