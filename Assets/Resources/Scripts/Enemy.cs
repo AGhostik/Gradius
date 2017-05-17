@@ -7,7 +7,7 @@ public enum AI
     Fan, Rugal, Garun, Fose, Dee
 }
 
-public class Enemy : MonoBehaviour {
+public class Enemy : Destroyable {
 
     [Header("Stats")]    
     [Range(-5f, 5f)]
@@ -23,12 +23,13 @@ public class Enemy : MonoBehaviour {
     private float timer_start;
     private float timer;
     private SpriteRenderer render;
-    private Transform thisTransform;
+    private EventController.unitDie sendScores = UIDraw.EnemyDied;
 
     // Use this for initialization
     void Start () {
         thisTransform = transform;
         render = gameObject.GetComponent<SpriteRenderer>();
+        health = max_health;
 
         if (ai_current == AI.Fan)
         {
@@ -41,9 +42,20 @@ public class Enemy : MonoBehaviour {
 	void Update () {   
         thisTransform.position += new Vector3(Time.deltaTime * move_speed, 0, 0);
 
+        if (health <= 0)
+        {
+            Die();
+        }
+
         Fan();
     }
-    
+
+    void OnDestroy()
+    {
+        //Camera.main.SendMessage("EnemyDied", 5);
+        sendScores(5);
+    }
+
     private void Fan()
     {
         timer -= Time.deltaTime;

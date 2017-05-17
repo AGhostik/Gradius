@@ -16,9 +16,10 @@ public class Projectile : MonoBehaviour {
     public bool toRight = true;
 
     [Header("Animation")]
-    public GameObject pierceExplosion;
-    public GameObject dieExplosion;
-    
+    public GameObject pierceEffect;
+    public GameObject hit_dieEffect;
+    public GameObject range_dieEffect;
+
     private float delta_speed;
     private Vector3 startPos;
     private Transform thisTransform;
@@ -44,7 +45,7 @@ public class Projectile : MonoBehaviour {
 
         if (TTL <= 0)
         {
-            Die(false);
+            Die(0);
         }
 
         rangeCheck();
@@ -55,19 +56,26 @@ public class Projectile : MonoBehaviour {
         if (pierce_count > 0)
         {
             pierce_count--;
-            instantianeExplosion(pierceExplosion);
+            instantianeExplosion(pierceEffect);
         }
         else
         {
-            Die();
+            Die(1);
         }
     }
 
-    private void Die(bool eff = true)
+    private void Die(int effectType = 0)
     {
-        if (eff)
+        switch (effectType)
         {
-            instantianeExplosion(dieExplosion);
+            case 1:
+            instantianeExplosion(hit_dieEffect);
+                break;
+            case 2:
+                instantianeExplosion(range_dieEffect);
+                break;
+            default:
+                break;
         }
         Destroy(gameObject);
     }
@@ -76,7 +84,7 @@ public class Projectile : MonoBehaviour {
     {
         if (expl != null)
         {
-            Instantiate(dieExplosion).transform.position = thisTransform.position;
+            Instantiate(hit_dieEffect).transform.position = thisTransform.position;
         }
     }
 
@@ -86,14 +94,14 @@ public class Projectile : MonoBehaviour {
         {
             if (thisTransform.position.x - startPos.x >= range)
             {
-                Die();
+                Die(2);
             }
         }
         else
         {
             if (startPos.x - thisTransform.position.x >= range)
             {
-                Die();
+                Die(2);
             }
         }
     }

@@ -46,7 +46,7 @@ public class UIhelper
     private int screen_height = 1;
     //
     
-    public Image image(Texture txt)
+    public Image texture(Texture txt)
     {
         return new Image(txt, scale);
     }

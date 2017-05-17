@@ -13,26 +13,12 @@ public class Destroyable : MonoBehaviour {
     public int max_health = 100;
 
     public Type objectType = Type.Enemy;
-    public GameObject explosion;
+    public GameObject die_Effect;
 
-    private int health;
-    private Transform thisTransform;
+    protected int health;
+    protected Transform thisTransform;
 
-    // Use this for initialization
-    void Start () {
-        thisTransform = transform;
-        health = max_health;
-    }
-	
-	// Update is called once per frame
-	void Update () {
-        if (health <= 0)
-        {
-            Die();
-        }
-    }
-
-    void OnTriggerEnter2D(Collider2D col)
+    protected void OnTriggerEnter2D(Collider2D col)
     {
         GameObject hitObject = col.gameObject;
         if ((objectType == Type.Enemy && hitObject.tag == "Projectile") ||
@@ -43,12 +29,12 @@ public class Destroyable : MonoBehaviour {
             bullet.checkDie();
         }
     }
-
-    private void Die()
+    
+    protected void Die()
     {
-        if (explosion != null)
+        if (die_Effect != null)
         {
-            Instantiate(explosion).transform.position = thisTransform.position;
+            Instantiate(die_Effect).transform.position = thisTransform.position;
         }
         Destroy(gameObject);
     }

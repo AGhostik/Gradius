@@ -5,11 +5,10 @@ using UnityEngine;
 public class MoveCamera : MonoBehaviour {
 
     public float finish_posX = 100;
-    public Texture progres_border;
-    public Texture progres_line;
 
     private float percent;
     private Transform thisTransform;
+    private EventController.setlevelProgress sendPercent = UIDraw.SetLevelProgress;
 
     // Use this for initialization
     void Start () {
@@ -24,6 +23,7 @@ public class MoveCamera : MonoBehaviour {
 	void Update () {
         moveTo();
         percentageCalculate();
+        sendPercent(percent);
 
         if (percent >= 100)
         {
@@ -34,14 +34,7 @@ public class MoveCamera : MonoBehaviour {
         {
             Application.Quit();
         }
-	}   
-
-    //удалить
-    void OnGUI() {
-        UIhelper drawUI = new UIhelper(256, 144);
-
-        drawUI.ProgresbarDraw(progres_border, progres_line, 2, 2, percent);
-    }   
+	}       
 
     private void moveTo()
     {

@@ -1,11 +1,10 @@
 fileFormatVersion: 2
-guid: 64a0883a51cf9c24bbb4d205e0b61432
-timeCreated: 1495041382
+guid: 57da4833613613f43a888df57b38fafb
+timeCreated: 1495026326
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences:
-  - die_Effect: {instanceID: 0}
+  defaultReferences: []
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

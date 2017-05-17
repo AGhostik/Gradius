@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShipControl : MonoBehaviour {
+public class Player : Destroyable {
 
     [Header("Stats")]
     [Range(0f,5f)]
@@ -12,8 +12,9 @@ public class ShipControl : MonoBehaviour {
     public Sprite NormalSprite;
     public Sprite UpSprite;
     public Sprite DownSprite;
-    public GameObject explosion;
 
+    private int old_health;
+    private int old_maxHealth;
     private float inputX;
     private float inputY;
     private float deltaX = 0;
@@ -22,7 +23,8 @@ public class ShipControl : MonoBehaviour {
     private Vector3 pos_max;
     private Camera main_cam;
     private SpriteRenderer render;
-    private Transform thisTransform;
+    private EventController.playerHealth sendHealth = UIDraw.SetPlayerHealth;
+    private EventController.playerHealth sendMaxHealth = UIDraw.SetPlayerMaxHealth;
 
     // Use this for initialization
     void Start()
@@ -30,11 +32,37 @@ public class ShipControl : MonoBehaviour {
         thisTransform = transform;
         main_cam = Camera.main;
         render = gameObject.GetComponent<SpriteRenderer>();
+
+        health = max_health;
+        old_health = health;
+        old_maxHealth = max_health;
+
+        sendHealth(health);
+        sendMaxHealth(max_health);
     }
 	
 	// Update is called once per frame
 	void Update () {
-        thisTransform.position += new Vector3(Time.deltaTime,0,0);
+        //thisTransform.position += new Vector3(Time.deltaTime,0,0);
+
+        if (health <= 0)
+        {
+            sendHealth(0);
+            Die();
+        }
+        else
+        {
+            if (old_health != health)
+            {
+                sendHealth(health);
+                old_health = health;
+            }
+            if (old_maxHealth != max_health)
+            {
+                sendMaxHealth(max_health);
+                old_maxHealth = max_health;
+            }
+        }
 
         pos_min = main_cam.ScreenToWorldPoint(new Vector3 (0,0,0));
         pos_max = main_cam.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));

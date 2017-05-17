@@ -1,10 +1,13 @@
 fileFormatVersion: 2
 guid: 32cc0449b93dac746ab288346924f761
-timeCreated: 1494499897
+timeCreated: 1495041412
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - pierceEffect: {instanceID: 0}
+  - hit_dieEffect: {instanceID: 0}
+  - range_dieEffect: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

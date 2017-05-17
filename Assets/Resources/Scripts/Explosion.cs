@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class Explosion : MonoBehaviour {
 
-    [Header("Stats")]
-    public float TTL = 0.3f;
+    [Header("Move")]    
     public float moveSpeed_multiplier = 4;
+
+    [Header("Time To Live")]
+    public float TTL = 0.3f;
 
     [Header("Animation")]
     public Sprite[] explosion = new Sprite[3];
