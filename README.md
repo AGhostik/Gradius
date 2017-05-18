@@ -13,9 +13,9 @@ What is it? / Что это?
 Game controls / Управление
 ------------
 
-Gamepad xbox: LS/DPad - move; A/X/B/Y - shot.
+Gamepad xbox: LS/DPad - move; A/X - shot.
 
-Keyboard: W/A/S/D or Up/Left/Down/Right - move; 1/2/3/4 - shot.
+Keyboard: W/A/S/D or Up/Left/Down/Right - move; z/x - shot.
 
 Download / Скачать
 ------------

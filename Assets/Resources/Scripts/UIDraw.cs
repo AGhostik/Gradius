@@ -18,9 +18,9 @@ public class UIDraw : MonoBehaviour {
     private string scoresStr = "Score: ";
     private string healthStr = "Health: ";
     private float playerHealthPercent;
-    
-	// Use this for initialization
-	void Start () {        
+
+    // Use this for initialization
+    void Start () {        
 	}
 
     // Update is called once per frame
@@ -37,11 +37,11 @@ public class UIDraw : MonoBehaviour {
     void OnGUI()
     {
         UIhelper drawer = new UIhelper(256, 144);
-
-        drawer.ProgresbarDraw(progres_border, progres_line, 2, 2, level_progress_percentage);
-        drawer.ProgresbarDraw(progres_border, progres_line, 35, 2, playerHealthPercent);
-        drawer.label(scoresStr).Draw(2, 11);
-        drawer.label(healthStr).Draw(35, 11);
+        
+        drawer.texture(progres_border).DrawProgresbar(progres_line, 2, 2, level_progress_percentage);
+        drawer.texture(progres_border).DrawProgresbar(progres_line, 35, 2, playerHealthPercent);
+        drawer.label(scoresStr).Draw(2, 11, 5);
+        drawer.label(healthStr).Draw(35, 11, 5);
     }
 
     private void playerHealthPercentCalculate()

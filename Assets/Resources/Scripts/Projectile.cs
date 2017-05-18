@@ -41,6 +41,12 @@ public class Projectile : MonoBehaviour {
 
         thisTransform.position += new Vector3( delta_speed * Time.deltaTime, 0, 0);
 
+        /*
+         * Vector3 dir = Quaternion.Euler(_angle) * Vector3.forward;
+         * ThisTransform.position += dir * _speed * Time.deltaTime;
+         * For better efficiency, calculate dir * _speed ahead of time. 
+         */
+
         TTL -= Time.deltaTime;
 
         if (TTL <= 0)
@@ -106,3 +112,4 @@ public class Projectile : MonoBehaviour {
         }
     }
 }
+ 

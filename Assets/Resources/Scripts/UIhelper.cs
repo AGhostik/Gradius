@@ -42,18 +42,37 @@ public class UIhelper
     //var
     protected float scale = 1f;
 
-    private int screen_width = 1;
-    private int screen_height = 1;
+    protected int screen_width = 1;
+    protected int screen_height = 1;
     //
-    
-    public Image texture(Texture txt)
+
+    /// <summary>
+    /// Set texture
+    /// </summary>
+    /// <param name="txt">Texture</param>
+    /// <param name="x_fromBottom">Alignment bottom</param>
+    /// <param name="y_fromRight">Alignment right</param>
+    public Image texture(Texture txt, bool align_Bottom = false, bool align_Right = false)
     {
-        return new Image(txt, scale);
+        return new Image(txt, align_Bottom, align_Right, scale, screen_height, screen_width);
     }
+
+    /// <summary>
+    /// Set label text
+    /// </summary>
     public Label label(string text)
     {
         return new Label(text, scale);
     }
+
+    /// <summary>
+    /// Set textarea
+    /// </summary>
+    public TextArea textArea()
+    {
+        return new TextArea(scale);
+    }
+
 
     //get-set
     public float get_ScaleMultiplier()
@@ -76,60 +95,34 @@ public class UIhelper
     {
         return screen_height;
     }
-
-    /// <summary>
-    /// Draw 4-side border and progres-line within, cropped by percentage
-    /// </summary>
-    public void ProgresbarDraw(Texture border, Texture lineWithinBorder, int startX, int startY, float percent)
-    {
-        int differenceX = (border.width > lineWithinBorder.width ? ((border.width - lineWithinBorder.width) / 2) : 0);
-        int differenceY = (border.height > lineWithinBorder.height ? ((border.height - lineWithinBorder.height) / 2) : 0);
-
-        Image bord = new Image(border, scale);
-        Image lin = new Image(lineWithinBorder, scale);
-
-        bord.Draw(startX, startY);
-
-        lin.DrawPartially(startX + differenceX, startY + differenceY, percent);
-    }
-
-    public void ProgresbarDraw(Texture border, Texture lineWithinBorder, int startX, int startY, float percent, bool horizontal = true, bool vertical = false)
-    {
-        int differenceX = (border.width > lineWithinBorder.width ? ((border.width - lineWithinBorder.width) / 2) : 0);
-        int differenceY = (border.height > lineWithinBorder.height ? ((border.height - lineWithinBorder.height) / 2) : 0);
-
-        Image bord = new Image(border, scale);
-        Image lin = new Image(border, scale);
-
-        bord.Draw(startX, startY);
-
-        lin.DrawPartially(startX + differenceX, startY + differenceY, percent, horizontal, vertical);        
-    }
 }
 
 public class Image
 {
     private Texture texture;
     private float scale;
+    private bool align_bottom;
+    private bool align_right;
+    private int screen_width;
+    private int screen_height;
 
-    public Image(Texture txt, float scale_arg)
+    public Image(Texture txt, bool align_Bottom, bool align_Right, float scale_arg, int scr_height, int scr_width)
     {
         texture = txt;
         scale = scale_arg;
+        align_bottom = align_Bottom;
+        align_right = align_Right;
+        screen_height = scr_height;
+        screen_width = scr_width;
     }
     ~Image() { }
-
+    
     /// <summary>
     /// Draw texture at (startX;startY)
     /// </summary>
     public void Draw(int startX, int startY)
     {
-        GUI.DrawTexture(new Rect(
-            startX * scale,
-            startY * scale,
-            texture.width * scale,
-            texture.height * scale),
-            texture, ScaleMode.StretchToFill);
+        DrawAndResizeBody(texture, startX, startY, 0, 0);
     }
 
     /// <summary>
@@ -137,8 +130,50 @@ public class Image
     /// </summary>
     public void DrawAndResize(int startX, int startY, int width = 0, int height = 0)
     {
-        int new_width = texture.width;
-        int new_height = texture.height;
+        DrawAndResizeBody(texture, startX, startY, width, height);
+    }
+
+    /// <summary>
+    /// Draw texture at (startX;startY) and crop it by percentage
+    /// </summary>
+    public void DrawPartially(int startX, int startY, float percent)
+    {
+        DrawAndResizePartiallyBody(texture, startX, startY, 0, 0, percent, true, false);
+    }
+    public void DrawPartially(int startX, int startY, float percent, bool horizontal, bool vertical)
+    {
+        DrawAndResizePartiallyBody(texture, startX, startY, 0, 0, percent, horizontal, vertical);
+    }
+
+    /// <summary>
+    /// Draw texture at (startX;startY) with new width and height and crop it by percentage
+    /// </summary>
+    public void DrawAndResizePartially(int startX, int startY, int width, int height, float percent)
+    {
+        DrawAndResizePartiallyBody(texture, startX, startY, width, height, percent, true, false);
+    }
+    public void DrawAndResizePartially(int startX, int startY, int width, int height, float percent, bool horizontal, bool vertical)
+    {
+        DrawAndResizePartiallyBody(texture, startX, startY, width, height, percent, horizontal, vertical);
+    }
+
+    /// <summary>
+    /// Draw 4-side border and progres-line within, cropped by percentage
+    /// </summary>
+    public void DrawProgresbar(Texture lineTexture, int startX, int startY, float percent)
+    {
+        DrawProgresbarBody(texture, lineTexture, startX, startY, percent, true, false);
+    }
+    public void DrawProgresbar(Texture lineTexture, int startX, int startY, float percent, bool horizontal = true, bool vertical = false)
+    {
+        DrawProgresbarBody(texture, lineTexture, startX, startY, percent, horizontal, vertical);
+    }
+
+    //Private:
+    private void DrawAndResizeBody(Texture txt, int startX, int startY, int width, int height)
+    {
+        int new_width = txt.width;
+        int new_height = txt.height;
 
         if (width > 0)
         {
@@ -149,110 +184,88 @@ public class Image
             new_height = height;
         }
 
+        int new_startX = startX;
+        int new_startY = startY;
+
+        if (align_bottom)
+        {
+            new_startY = screen_height - startY - new_height;            
+        }
+        if (align_right)
+        {
+            new_startX = screen_width - startX - new_width;
+        }
+
         GUI.DrawTexture(new Rect(
-            startX * scale,
-            startY * scale,
+            new_startX * scale,
+            new_startY * scale,
             new_width * scale,
             new_height * scale),
-            texture, ScaleMode.StretchToFill);
+            txt, ScaleMode.StretchToFill);
     }
-
-    /// <summary>
-    /// Draw texture at (startX;startY) and crop it by percentage
-    /// </summary>
-    public void DrawPartially(int startX, int startY, float percent)
+    private void DrawAndResizePartiallyBody(Texture txt, int startX, int startY, int width, int height, float percent, bool horizontal, bool vertical)
     {
-        Rect pos;
-        Rect texC;
+        int new_startX = startX;
+        int new_startY = startY;
 
-        pos = new Rect(
-            startX * scale,
-            startY * scale,
-            (texture.width / 100.0f * percent) * scale,
-            texture.height * scale);
+        int new_width = txt.width;
+        int new_height = txt.height;
 
-        texC = new Rect(0f, 0f, percent / 100, 1f);
+        if (width > 0)
+        {
+            new_width = width;
+        }
+        if (height > 0)
+        {
+            new_height = height;
+        }
 
-        GUI.DrawTextureWithTexCoords(pos, texture, texC);
-    }
-    public void DrawPartially(int startX, int startY, float percent, bool horizontal, bool vertical)
-    {
-        Rect pos;
-        Rect texC;
-        int pos_w = texture.width;
-        int pos_h = texture.height;
+        float pos_w = new_width;
+        float pos_h = new_height;
+
         float texC_w = 1f;
         float texC_h = 1f;
 
+        Rect pos;
+        Rect texC;
+
+        if (align_bottom)
+        {
+            new_startY = screen_height - startY - new_height;            
+        }
+        if (align_right)
+        {
+            new_startX = screen_width - startX - new_width;
+        }
+
         if (horizontal)
         {
-            pos_w = (int)(texture.width / 100 * percent);
+            pos_w = (new_width * percent / 100.0f);
             texC_w = percent / 100;
         }
         if (vertical)
         {
-            pos_h = (int)(texture.height / 100.0f * percent);
+            pos_h = (new_height * percent / 100.0f);
             texC_h = percent / 100;
         }
 
         pos = new Rect(
-            startX * scale,
-            startY * scale,
+            new_startX * scale,
+            new_startY * scale,
             pos_w * scale,
             pos_h * scale);
 
         texC = new Rect(0f, 0f, texC_w, texC_h);
 
-        GUI.DrawTextureWithTexCoords(pos, texture, texC);
+        GUI.DrawTextureWithTexCoords(pos, txt, texC);
     }
-
-    /// <summary>
-    /// Draw texture at (startX;startY) with new width and height and crop it by percentage
-    /// </summary>
-    public void DrawAndResizePartially(int startX, int startY, int width, int height, float percent)
+    private void DrawProgresbarBody(Texture txt, Texture lineTexture, int startX, int startY, float percent, bool horizontal, bool vertical)
     {
-        Rect pos;
-        Rect texC;
+        int differenceX = (txt.width > lineTexture.width ? ((txt.width - lineTexture.width) / 2) : 0);
+        int differenceY = (txt.height > lineTexture.height ? ((txt.height - lineTexture.height) / 2) : 0);
 
-        pos = new Rect(
-            startX * scale,
-            startY * scale,
-            (width / 100.0f * percent) * scale,
-            height * scale);
-
-        texC = new Rect(0f, 0f, percent / 100, 1f);
-
-        GUI.DrawTextureWithTexCoords(pos, texture, texC);
-    }
-    public void DrawAndResizePartially(int startX, int startY, int width, int height, float percent, bool horizontal, bool vertical)
-    {
-        Rect pos;
-        Rect texC;
-        int pos_w = width;
-        int pos_h = height;
-        float texC_w = 1f;
-        float texC_h = 1f;
-
-        if (horizontal)
-        {
-            pos_w = (int)(width / 100.0f * percent);
-            texC_w = percent / 100;
-        }
-        if (vertical)
-        {
-            pos_h = (int)(height / 100.0f * percent);
-            texC_h = percent / 100;
-        }
-
-        pos = new Rect(
-            startX * scale,
-            startY * scale,
-            pos_w * scale,
-            pos_h * scale);
-
-        texC = new Rect(0f, 0f, texC_w, texC_h);
-
-        GUI.DrawTextureWithTexCoords(pos, texture, texC);
+        DrawAndResizeBody(txt, startX, startY, 0, 0);
+        DrawAndResizePartiallyBody(lineTexture, startX + differenceX, startY + differenceY, 0, 0, percent, horizontal, vertical);
     }
 }
 
@@ -260,30 +273,70 @@ public class Label
 {
     private float scale;
     private string text;
-    private GUIStyle style;
+    private GUIStyle style = new GUIStyle();
 
     public Label(string label_arg, float scale_arg)
     {
         text = label_arg;
         scale = scale_arg;
 
-        style = new GUIStyle();
-        style.fontSize = (int)(5 * scale);
+        style.fontSize = (int)(2 * scale);
         style.normal.textColor = Color.white;
-        //style.font = Resources.Load("FontS") as Font;
     }
     ~Label() { }
 
     /// <summary>
     /// Draw text label
     /// </summary>
-    public void Draw(int startX, int startY, int width = 1, int height = 1)
+    public void Draw(int startX, int startY, int font_size)
+    {
+        style.fontSize = (int)(font_size * scale);
+        GUI.Label(new Rect(startX * scale, startY * scale, 1 * scale, 1 * scale), text, style);
+    }
+    public void Draw(int startX, int startY, int width, int height)
     {
         GUI.Label(new Rect(startX * scale, startY * scale, width * scale, height * scale), text, style);
     }
 
-    public void setStyle()
+    /// <summary>
+    /// To load custom font use: Font font = Resources.Load("myFontName") as Font;
+    /// </summary>
+    public void setStyle(GUIStyle new_style)
     {
-        
+        style = new_style;
+        style.fontSize = (int)(style.fontSize * scale);
     }
+}
+
+public class TextArea
+{
+    private float scale;
+
+    private GUIStyle style = new GUIStyle(GUI.skin.textArea);
+
+    public TextArea(float scale_arg)
+    {
+        scale = scale_arg;
+        style.fontSize = (int)(4 * scale);
+    }
+    ~TextArea() { }
+
+    public void Draw(ref string text, int startX, int startY, int width, int height)
+    {
+        text = GUI.TextArea(new Rect(startX * scale, startY * scale, width * scale, height * scale), text, style);
+    }
+    public void Draw(ref string text, int startX, int startY, int width, int height, int font_scale)
+    {
+        style.fontSize = (int)(font_scale * scale);
+        text = GUI.TextArea(new Rect(startX * scale, startY * scale, width * scale, height * scale), text, style);
+    }
+
+    /// <summary>
+    /// To load custom font use: Font font = Resources.Load("myFontName") as Font;
+    /// </summary>
+    public void setStyle(GUIStyle new_style)
+    {
+        style = new_style;
+        style.fontSize = (int)(style.fontSize * scale);
+    }    
 }
