@@ -292,6 +292,9 @@ public class Label
     {
         style.fontSize = (int)(font_size * scale);
         GUI.Label(new Rect(startX * scale, startY * scale, 1 * scale, 1 * scale), text, style);
+
+        //Vector2 size = style.CalcSize(new GUIContent(text));
+        //Debug.Log(size/scale + " " + text);
     }
     public void Draw(int startX, int startY, int width, int height)
     {

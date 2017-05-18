@@ -9,14 +9,28 @@ public enum Type
 
 public class Destroyable : MonoBehaviour {
 
-    [Header("Health")]
-    public int max_health = 100;
-
+    [Header("Type")]
     public Type objectType = Type.Enemy;
+
+    [Header("Health")]
+    public int max_health = 100;    
     public GameObject die_Effect;
+
+    [Header("Drop")]
+    public bool onlyOneDrop = true;
+    public List<GameObject> Drop;
+    [Range(0f, 100f)]
+    public List<float> Chance;
 
     protected int health;
     protected Transform thisTransform;
+
+    public void Heal(int value)
+    {        
+        health += value;
+        if (health > max_health)
+            health = max_health;
+    }
 
     protected void OnTriggerEnter2D(Collider2D col)
     {
@@ -36,6 +50,24 @@ public class Destroyable : MonoBehaviour {
         {
             Instantiate(die_Effect).transform.position = thisTransform.position;
         }
+        for (int i = 0; i < Drop.Count; i++)
+        {
+            if (i + 1 > Chance.Count)
+            {
+                break;
+            }
+
+            float randomChance = Random.Range(0, 100);
+            if (randomChance <= Chance[i])
+            {
+                Instantiate(Drop[i]).transform.position = thisTransform.position;
+                if (onlyOneDrop)
+                {
+                    break;
+                }
+            }
+        }
+
         Destroy(gameObject);
     }
 }

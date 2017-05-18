@@ -17,9 +17,9 @@ public class Spawner : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (current_pauseTimer <= 0)
+        if (wave_counter < waves.Length)
         {
-            if (wave_counter < waves.Length)
+            if (current_pauseTimer <= 0)
             {
                 spawn();
             }
