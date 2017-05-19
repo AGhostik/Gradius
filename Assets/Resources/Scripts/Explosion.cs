@@ -5,7 +5,8 @@ using UnityEngine;
 public class Explosion : MonoBehaviour {
 
     [Header("Move")]    
-    public float moveSpeed_multiplier = 4;
+    public float axisMultiplier = 0.5f;
+    public Vector3 axis = new Vector3(1, 0, 0);
 
     [Header("Time To Live")]
     public float TTL = 0.3f;
@@ -30,7 +31,7 @@ public class Explosion : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        thisTransform.position += new Vector3(Time.deltaTime * moveSpeed_multiplier, 0, 0);
+        thisTransform.position += axis * axisMultiplier * Time.deltaTime;
         Die();
     }
 

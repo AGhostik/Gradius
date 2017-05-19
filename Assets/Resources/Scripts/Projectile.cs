@@ -13,48 +13,45 @@ public class Projectile : MonoBehaviour {
     public int pierce_count = 0;
 
     [Header("Direction")]
-    public bool toRight = true;
+    public float angle = 0;   
+    public bool Sin = false;
+    public float frequency = 1;  // Speed of sine movement
+    public float magnitude = 1;   // Size of sine movement
 
     [Header("Animation")]
     public GameObject pierceEffect;
     public GameObject hit_dieEffect;
     public GameObject range_dieEffect;
-
-    private float delta_speed;
+    
     private Vector3 startPos;
+    private float currentDistance;
+    private Vector3 axis;
+
     private Transform thisTransform;
 
     // Use this for initialization
     void Start () {
         thisTransform = transform;
         startPos = thisTransform.position;
-        delta_speed = ((speed_plus + 1) * speed_mult) * 2;
 
-        if (!toRight)
-        {
-            delta_speed *= -1;
-        }
-	}
+        thisTransform.localEulerAngles = new Vector3(0, 0, angle);
+        axis = axisAngle(angle);
+
+        axis *= ((speed_plus + 1) * speed_mult) * 2;
+    }
 
     // Update is called once per frame
     void Update () {
-
-        thisTransform.position += new Vector3( delta_speed * Time.deltaTime, 0, 0);
-
-        /*
-         * Vector3 dir = Quaternion.Euler(_angle) * Vector3.forward;
-         * ThisTransform.position += dir * _speed * Time.deltaTime;
-         * For better efficiency, calculate dir * _speed ahead of time. 
-         */
-
         TTL -= Time.deltaTime;
-
         if (TTL <= 0)
         {
             Die(0);
         }
 
+        rangeRemain();
         rangeCheck();
+        thisTransform.eulerAngles += new Vector3(0, 0, Time.deltaTime);
+        Direction();
 	}
 
     public void checkDie()
@@ -68,6 +65,30 @@ public class Projectile : MonoBehaviour {
         {
             Die(1);
         }
+    }
+
+    private void Direction()
+    {
+        if (Sin)
+        {
+            Vector3 sin_transform = axisAngle(angle + 90) * (Mathf.Sin(currentDistance * frequency)) * magnitude;
+            thisTransform.position += (sin_transform + axis) * Time.deltaTime;
+        }
+        else
+        {
+            thisTransform.position += axis * Time.deltaTime;
+        }
+    }
+
+    private Vector3 axisAngle(float alpha)
+    {
+        float betha = alpha * Mathf.Deg2Rad;
+        return new Vector3(Mathf.Cos(betha), Mathf.Sin(betha), 0);
+    }
+    
+    private void rangeRemain()
+    {
+        currentDistance = Vector3.Distance(thisTransform.position, startPos);
     }
 
     private void Die(int effectType = 0)
@@ -90,25 +111,17 @@ public class Projectile : MonoBehaviour {
     {
         if (expl != null)
         {
-            Instantiate(hit_dieEffect).transform.position = thisTransform.position;
+            GameObject exp = Instantiate(hit_dieEffect);
+            exp.transform.position = thisTransform.position;
+            exp.GetComponent<Explosion>().axis = axis;
         }
     }
 
     private void rangeCheck()
     {
-        if (toRight)
+        if (currentDistance >= range)
         {
-            if (thisTransform.position.x - startPos.x >= range)
-            {
-                Die(2);
-            }
-        }
-        else
-        {
-            if (startPos.x - thisTransform.position.x >= range)
-            {
-                Die(2);
-            }
+            Die(2);
         }
     }
 }

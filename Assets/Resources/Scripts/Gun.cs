@@ -15,21 +15,26 @@ public class Gun : MonoBehaviour {
     public float firerate = 1;
     public int shotsBetweenPause = 3;
     public float pause_length = 0;
+    public bool rotate = false;
+    public float rotate_speed = 30;
 
-    [Header("Control")]
+    [Header("Control")]    
     public bool autoShot = true;
     public string inputAxisName = "Fire";
 
+    public float angle = 0;
     private float firerate1_timer = 0;
     private float pause_timer = 0;
     private int shot_count = 0;
 
     // Use this for initialization
-    void Start () {        
+    void Start () {
 	}
 	
 	// Update is called once per frame
 	void Update () {
+        updateAngle();
+
         if (autoShot)
         {
             Shot();
@@ -38,6 +43,19 @@ public class Gun : MonoBehaviour {
         if (Input.GetAxisRaw(inputAxisName) != 0)
         {
             Shot();
+        }
+    }
+
+    private void updateAngle()
+    {
+        if (rotate)
+        {
+            angle += rotate_speed * Time.deltaTime;
+        }
+
+        if (angle >= 360)
+        {
+            angle -= 360;
         }
     }
 
@@ -50,7 +68,13 @@ public class Gun : MonoBehaviour {
                 if (firerate1_timer >= firerate)
                 {
                     GameObject bullet = Instantiate(Bullet);
-                    bullet.GetComponent<Projectile>().damage += damageUP;
+                    Projectile proj = bullet.GetComponent<Projectile>();
+                    proj.damage += damageUP;
+
+                    if (rotate)
+                    {
+                        proj.angle = angle;
+                    }
 
                     if (empty_startPos != null)
                     {

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class MoveCamera : MonoBehaviour {
 
+    public bool stop = false;
     public float finish_posX = 100;
 
     private float percent;
@@ -21,7 +22,10 @@ public class MoveCamera : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        moveTo();
+        if (!stop)
+        {
+            moveTo();
+        }
         percentageCalculate();
         sendPercent(percent);
 
