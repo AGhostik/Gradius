@@ -4,23 +4,26 @@ using UnityEngine;
 
 public class AnimatedObject : MonoBehaviour {
 
-    [Header("Animation")]
+    [Header("Timer")]
+    public float oneFrameTime = 0.1f;
+
+    [Header("Sprites")]
     public Sprite[] frames = new Sprite[1];
 
-    private int current_frame = 0;
-    private float timer_start;
-    private float timer;
+    protected float timer;
+    protected int current_frame = 0; 
+    
     private SpriteRenderer render;
-
-    // Use this for initialization
-    void Start () {
-        render = gameObject.GetComponent<SpriteRenderer>();
-
-        timer_start = 0.1f;
-        timer = timer_start;
+    
+    /// <summary>
+    /// Put in OnStart();
+    /// </summary>
+    protected void Amination_OnStart () {
+        render = gameObject.GetComponent<SpriteRenderer>();        
+        timer = oneFrameTime;
     }    
 
-    private void Anim()
+    protected void timerAnimation()
     {
         timer -= Time.deltaTime;
         if (timer <= 0)
@@ -34,12 +37,15 @@ public class AnimatedObject : MonoBehaviour {
                 current_frame = 0;
             }
             changeFrame(current_frame);
-            timer = timer_start;
+            timer = oneFrameTime;
         }
     }
 
-    private void changeFrame(int frame_number = 0)
+    protected void changeFrame(int frame_number = 0)
     {
-        render.sprite = frames[frame_number];
+        if (render != null)
+        {
+            render.sprite = frames[frame_number];
+        }
     }
 }

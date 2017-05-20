@@ -282,6 +282,7 @@ public class Label
 
         style.fontSize = (int)(2 * scale);
         style.normal.textColor = Color.white;
+        style.stretchWidth = true;
     }
     ~Label() { }
 

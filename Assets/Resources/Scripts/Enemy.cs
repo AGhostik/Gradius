@@ -15,27 +15,18 @@ public class Enemy : Destroyable {
 
     [Header("AI type")]
     public AI ai_current;
-
-    [Header("Animation")]
-    public Sprite[] frames = new Sprite[1];    
-
-    private int current_frame = 0;
-    private float timer_start;
-    private float timer;
-    private SpriteRenderer render;
-    private EventController.unitDie sendScores = UIDraw.EnemyDied;
+    public int score = 5;
 
     // Use this for initialization
-    void Start () {
+    void Start () {        
         thisTransform = transform;
-        render = gameObject.GetComponent<SpriteRenderer>();
         health = max_health;
 
         if (ai_current == AI.Fan)
         {
-            timer_start = 0.05f;
-            timer = timer_start;
+            oneFrameTime = 0.05f;
         }
+        Amination_OnStart();
     }
 	
 	// Update is called once per frame
@@ -47,35 +38,11 @@ public class Enemy : Destroyable {
             Die();
         }
 
-        Fan();
+        timerAnimation();
     }
 
-    void OnDestroy()
+    void OnDisable()
     {
-        //Camera.main.SendMessage("EnemyDied", 5);
-        sendScores(5);
-    }
-
-    private void Fan()
-    {
-        timer -= Time.deltaTime;
-        if (timer <= 0)
-        {
-            if (current_frame < frames.Length - 1)
-            {
-                current_frame++;
-            }
-            else
-            {
-                current_frame = 0;
-            }
-            changeFrame(current_frame);
-            timer = timer_start;
-        }
-    }
-
-    private void changeFrame(int frame_number = 0)
-    {
-        render.sprite = frames[frame_number];
+        EventController.addScore(score);
     }
 }

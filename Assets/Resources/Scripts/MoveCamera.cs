@@ -5,15 +5,19 @@ using UnityEngine;
 public class MoveCamera : MonoBehaviour {
 
     public bool stop = false;
+    public float speed = 1;
     public float finish_posX = 100;
 
+    private bool old_stopState;
     private float percent;
+    private float _speed;
     private Transform thisTransform;
-    private EventController.setlevelProgress sendPercent = UIDraw.SetLevelProgress;
 
     // Use this for initialization
     void Start () {
         thisTransform = transform;
+        _speed = speed;
+        old_stopState = !stop;
         if (Screen.fullScreen)
         {
             Cursor.visible = false;
@@ -21,35 +25,53 @@ public class MoveCamera : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
-        if (!stop)
-        {
-            moveTo();
-        }
+	void Update () {        
         percentageCalculate();
-        sendPercent(percent);
+        sendPercent();
 
         if (percent >= 100)
         {
-            Time.timeScale = 0;
+            stop = true;
         }
 
-        if (Input.GetAxisRaw("Menu") != 0)
+        if (stop != old_stopState)
         {
-            Application.Quit();
+            changeSpeed(stop);
+            old_stopState = stop;
         }
-	}       
+
+        moveTo();
+	}
+
+    private void changeSpeed(bool isStop)
+    {
+        if (isStop)
+        {
+            speed = 0;
+            EventController.setCamSpeed(0);
+        }
+        else
+        {
+            speed = _speed;
+            EventController.setCamSpeed(speed);
+        }
+    }
 
     private void moveTo()
     {
         if (thisTransform.position.x < finish_posX)
         {
-            thisTransform.position += new Vector3(Time.deltaTime, 0, 0);
+            thisTransform.position += new Vector3(speed * Time.deltaTime, 0, 0);
         }
     }
 
     private void percentageCalculate()
     {
         percent = (thisTransform.position.x / finish_posX) * 100;
+    }
+
+    private void sendPercent()
+    {
+        EventController.setLevelProgress(percent);
     }
 }

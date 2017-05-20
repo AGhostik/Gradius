@@ -25,7 +25,11 @@ public class Projectile : MonoBehaviour {
     
     private Vector3 startPos;
     private float currentDistance;
+
+    public float angle_perpend;
+
     private Vector3 axis;
+    private Vector3 sin_transform;
 
     private Transform thisTransform;
 
@@ -36,6 +40,8 @@ public class Projectile : MonoBehaviour {
 
         thisTransform.localEulerAngles = new Vector3(0, 0, angle);
         axis = axisAngle(angle);
+
+        angle_perpend = angle + 90;
 
         axis *= ((speed_plus + 1) * speed_mult) * 2;
     }
@@ -71,7 +77,7 @@ public class Projectile : MonoBehaviour {
     {
         if (Sin)
         {
-            Vector3 sin_transform = axisAngle(angle + 90) * (Mathf.Sin(currentDistance * frequency)) * magnitude;
+            sin_transform = axisAngle(angle_perpend) * (Mathf.Sin(currentDistance * frequency)) * magnitude;
             thisTransform.position += (sin_transform + axis) * Time.deltaTime;
         }
         else

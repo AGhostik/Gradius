@@ -5,44 +5,97 @@ using UnityEngine;
 public class Gun : MonoBehaviour {
     
     [Header("Ammunition")]
-    public GameObject Bullet;    
+    public List<GameObject> Projectiles;    
 
     [Header("Start position")]
-    public GameObject empty_startPos;
+    public GameObject muzzle;
+    public List<GameObject> Companions;
 
     [Header("Stats")]
     public int damageUP = 0;
     public float firerate = 1;
     public int shotsBetweenPause = 3;
     public float pause_length = 0;
+
+    [Header("Rotate projectile")]
     public bool rotate = false;
+    public float angle = 0;
     public float rotate_speed = 30;
 
     [Header("Control")]    
     public bool autoShot = true;
-    public string inputAxisName = "Fire";
+    public string inputAxisName = "X";
 
-    public float angle = 0;
-    private float firerate1_timer = 0;
-    private float pause_timer = 0;
     private int shot_count = 0;
+    private int projectile_level = 0;
+    private float firerate1_timer = 0;
+    private float pause_timer = 0;    
+
+    private Transform gun_transform;
+    private Transform muzzle_transform;
 
     // Use this for initialization
     void Start () {
+        gun_transform = transform;
+        muzzle_transform = muzzle == null ? null : muzzle.transform;
 	}
-	
-	// Update is called once per frame
-	void Update () {
+    
+    // Update is called once per frame
+    void Update () {
         updateAngle();
 
         if (autoShot)
         {
             Shot();
         }
-        else
-        if (Input.GetAxisRaw(inputAxisName) != 0)
+    }
+
+    private void OnEnable()
+    {
+        if (!autoShot)
         {
-            Shot();
+            switch (inputAxisName)
+            {
+                case "A":
+                    EventController.InputA += Shot;
+                    break;
+                case "B":
+                    EventController.InputB += Shot;
+                    break;
+                case "X":
+                    EventController.InputX += Shot;
+                    break;
+                case "Y":
+                    EventController.InputY += Shot;
+                    break;
+            }
+        }
+    }
+
+    private void OnDisable()
+    {
+        switch (inputAxisName)
+        {
+            case "A":
+                EventController.InputA -= Shot;
+                break;
+            case "B":
+                EventController.InputB -= Shot;
+                break;
+            case "X":
+                EventController.InputX -= Shot;
+                break;
+            case "Y":
+                EventController.InputY -= Shot;
+                break;
+        }
+    }
+
+    private void upgradeGun()
+    {
+        if (projectile_level < Projectiles.Count - 1)
+        {
+            projectile_level++;
         }
     }
 
@@ -59,31 +112,42 @@ public class Gun : MonoBehaviour {
         }
     }
 
+    private void createProjectile()
+    {
+        GameObject bullet = Instantiate(Projectiles[projectile_level]);
+        Projectile proj = bullet.GetComponent<Projectile>();
+        proj.damage += damageUP;
+
+        if (rotate)
+        {
+            proj.angle = angle;
+        }
+
+        if (muzzle != null)
+        {
+            bullet.transform.position = muzzle_transform.position;
+        }
+        else
+        {
+            bullet.transform.position = gun_transform.position;
+        }
+
+        foreach (GameObject comp in Companions)
+        {
+            Instantiate(bullet).transform.position = comp.transform.position;
+        }
+    }
+
     private void Shot()
     {
-        if (Bullet != null)
+        if (Projectiles.Count > 0 && Projectiles[projectile_level] != null)
         {
             if (shot_count < shotsBetweenPause)
             {
                 if (firerate1_timer >= firerate)
                 {
-                    GameObject bullet = Instantiate(Bullet);
-                    Projectile proj = bullet.GetComponent<Projectile>();
-                    proj.damage += damageUP;
+                    createProjectile();
 
-                    if (rotate)
-                    {
-                        proj.angle = angle;
-                    }
-
-                    if (empty_startPos != null)
-                    {
-                        bullet.transform.position = empty_startPos.transform.position;
-                    }
-                    else
-                    {
-                        bullet.transform.position = gameObject.transform.position;
-                    }
                     shot_count++;
                     firerate1_timer = 0;
                     pause_timer = 0;

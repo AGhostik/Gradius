@@ -7,7 +7,7 @@ public enum Type
     Player, Enemy
 }
 
-public class Destroyable : MonoBehaviour {
+public class Destroyable : AnimatedObject {
 
     [Header("Type")]
     public Type objectType = Type.Enemy;
@@ -32,18 +32,6 @@ public class Destroyable : MonoBehaviour {
             health = max_health;
     }
 
-    protected void OnTriggerEnter2D(Collider2D col)
-    {
-        GameObject hitObject = col.gameObject;
-        if ((objectType == Type.Enemy && hitObject.tag == "Projectile") ||
-            (objectType == Type.Player && hitObject.tag == "EnemyProjectile"))
-        {
-            Projectile bullet = hitObject.GetComponent<Projectile>();
-            health -= bullet.damage;
-            bullet.checkDie();
-        }
-    }
-    
     protected void Die()
     {
         if (die_Effect != null)
@@ -69,5 +57,42 @@ public class Destroyable : MonoBehaviour {
         }
 
         Destroy(gameObject);
+    }
+
+    private void OnTriggerEnter2D(Collider2D col)
+    {
+        GameObject hitObject = col.gameObject;
+        if (objectType == Type.Player)
+        {
+            if (hitObject.tag == "EnemyProjectile")
+            {
+                Projectile bullet = hitObject.GetComponent<Projectile>();
+                decreaseHealth(bullet.damage);
+                bullet.checkDie();
+            }
+            else
+            if (hitObject.tag == "Item")
+            {
+                Destroy(hitObject);
+            }
+        } else
+        if (hitObject.tag == "Projectile")
+        {
+            Projectile bullet = hitObject.GetComponent<Projectile>();
+            decreaseHealth(bullet.damage);
+            bullet.checkDie();
+        }
+    }
+
+    private void decreaseHealth(int damage)
+    {
+        if (damage > health)
+        {
+            health = 0;
+        }
+        else
+        {
+            health -= damage;
+        }
     }
 }

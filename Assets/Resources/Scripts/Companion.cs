@@ -2,45 +2,50 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Companion : MonoBehaviour {
-
-    [Header("Animation")]
-    public Sprite[] frames = new Sprite[1];
-
+public class Companion : AnimatedObject {
+    
     [Header("Following")]
     public GameObject parent;
     public float posAccuracy = 0.1f;
     public int posListLength = 20;
 
-    private int current_frame = 0;
-    private float timer_start = 0.5f;
-    private float timer;
-    private SpriteRenderer render;
+    private float camSpeed;
     private Transform thisTransform;
     private Transform parentTransform;
     private Vector3 distance;
-    private Vector3 olpParentPos;
+    private Vector3 oldParentPos;
 
     private List<Vector3> posList = new List<Vector3>();
 
     // Use this for initialization
     void Start () {
         thisTransform = transform;
-        render = gameObject.GetComponent<SpriteRenderer>();
 
         parentTransform = parent.transform;
-        olpParentPos = parentTransform.position;
+        oldParentPos = parentTransform.position;
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    private void OnEnable()
+    {
+        EventController.UpdateCameraSpeed += takeCamSpeed;
+    }
+
+    private void OnDisable()
+    {
+        EventController.UpdateCameraSpeed -= takeCamSpeed;
+    }
+
+    // Update is called once per frame
+    void Update () {
         if (parent != null)
         {
-            //thisTransform.position += new Vector3(Time.deltaTime, 0, 0);
-            olpParentPos += new Vector3(Time.deltaTime, 0, 0);
+            if (camSpeed > 0)
+            {
+                updateList();
 
-            updateList();
-            Anim();
+                oldParentPos += new Vector3(camSpeed * Time.deltaTime, 0, 0);
+            }
+
             followTheParent();
         }
         else
@@ -49,17 +54,22 @@ public class Companion : MonoBehaviour {
         }
 	}
 
+    private void takeCamSpeed(float value)
+    {
+        camSpeed = value;
+    }
+
     private void updateList()
     {
         for (int i = 0; i < posList.Count; i++)
         {
-            posList[i] += new Vector3(Time.deltaTime, 0, 0);
+            posList[i] += new Vector3(camSpeed * Time.deltaTime, 0, 0);
         }
     }
 
     private void followTheParent()
     {
-        distance = parentTransform.position - olpParentPos;
+        distance = parentTransform.position - oldParentPos;
 
         if (distance.magnitude >= posAccuracy)
         {
@@ -70,30 +80,7 @@ public class Companion : MonoBehaviour {
             }
 
             posList.Add(parentTransform.position);
-            olpParentPos = parentTransform.position;
+            oldParentPos = parentTransform.position;
         }
-    }
-
-    private void Anim()
-    {
-        timer -= Time.deltaTime;
-        if (timer <= 0)
-        {
-            if (current_frame < frames.Length - 1)
-            {
-                current_frame++;
-            }
-            else
-            {
-                current_frame = 0;
-            }
-            changeFrame(current_frame);
-            timer = timer_start;
-        }
-    }
-
-    private void changeFrame(int frame_number = 0)
-    {
-        render.sprite = frames[frame_number];
     }
 }

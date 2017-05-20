@@ -7,119 +7,95 @@ public class UIDraw : MonoBehaviour {
     public Texture progres_border;
     public Texture progres_line;
 
-    private static int scores = 0;
-    private static int damage1;
-    private static int damage2;
-    private static int player_health = 0;
-    private static int player_maxHealth = 0;
-    private static float level_progress_percentage;
-
-    private int old_scores;
-    private int old_health;
-    private int old_maxHealth;
-    private int old_damage1;
-    private int old_damage2;
     private string damage1Str = "Gun1 Damage: ";
     private string damage2Str = "Gun2 Damage: ";
     private string scoresStr = "Score: ";
     private string healthStr = "Health: ";
+
+    private int playerHealth;
+    private int playerMaxHealth;
+    private int old_playerHealth;
+    private int old_playerMaxHealth;
+
+    private float level_progress;
     private float playerHealthPercent;
 
-    // Use this for initialization
+    private void OnEnable()
+    {
+        EventController.UpdatePlayerHealth += takePlayerHealth;
+        EventController.UpdatePlayerMaxHealth += takePlayerMaxHealth;
+        EventController.UpdateLevelProgress += takeLevelProgress;
+        EventController.UpdateScores += takeScores;
+    }
+
+    private void OnDisable()
+    {
+        EventController.UpdatePlayerHealth -= takePlayerHealth;
+        EventController.UpdatePlayerMaxHealth -= takePlayerMaxHealth;
+        EventController.UpdateLevelProgress -= takeLevelProgress;
+        EventController.UpdateScores -= takeScores;
+    }
+
     void Start () {
-        damage1 = 5; //убрать в будущем!
-        damage2 = 65;
 	}
 
-    // Update is called once per frame
     void Update () {
-        scoresUpdate();
-        damageUpdate();
-        playerHealthUpdate();
+        updateHealth();
     }
 
     void OnGUI()
     {
         UIhelper drawer = new UIhelper(256, 144);
         
-        drawer.texture(progres_border).DrawProgresbar(progres_line, 2, 2, level_progress_percentage);
+        drawer.texture(progres_border).DrawProgresbar(progres_line, 2, 2, level_progress);
         drawer.texture(progres_border).DrawProgresbar(progres_line, 35, 2, playerHealthPercent);
         drawer.label(scoresStr).Draw(2, 11, 5);
         drawer.label(healthStr).Draw(35, 11, 5);
-        drawer.label(damage1Str).Draw(2, 130, 5);
-        drawer.label(damage2Str).Draw(2, 137, 5);
+        //drawer.label(damage1Str).Draw(2, 130, 5);
+        //drawer.label(damage2Str).Draw(2, 137, 5);
     }
 
-    private void damageUpdate()
+    private void takeScores(int value)
     {
-        if (damage1 != old_damage1)
+        scoresStr = "Score: " + value;
+    }
+
+    private void takeLevelProgress(float value)
+    {
+        level_progress = value;
+    }
+
+    private void takePlayerHealth(int value)
+    {
+        playerHealth = value;
+    }
+
+    private void takePlayerMaxHealth(int value)
+    {
+        playerMaxHealth = value;
+    }
+
+    private void calculateHealthPercent()
+    {
+        playerHealthPercent = (float)playerHealth / playerMaxHealth * 100;
+        healthStr = "Health: " + playerHealth;
+    }
+
+    private void updateHealth()
+    {
+        if ((old_playerHealth != playerHealth) && (old_playerMaxHealth != playerMaxHealth))
         {
-            damage1Str = "Gun1 Damage: " + damage1;
-            old_damage1 = damage1;
+            calculateHealthPercent();
         }
-        if (damage2 != old_damage2)
+        else
+        if (old_playerHealth != playerHealth)
         {
-            damage2Str = "Gun2 Damage: " + damage2;
-            old_damage2 = damage2;
+            calculateHealthPercent();
         }
-    }
-
-    private void scoresUpdate()
-    {
-        if (scores != old_scores)
+        else
+        if (old_playerMaxHealth != playerMaxHealth)
         {
-            scoresStr = "Score: " + scores;
-            old_scores = scores;
+            calculateHealthPercent();
         }
-    }
-
-    private void playerHealthUpdate()
-    {
-        if (old_health != player_health)
-        {
-            old_health = player_health;
-            if (player_maxHealth != 0)
-            {
-                playerHealthPercent = (float)player_health / player_maxHealth * 100;
-            }
-            healthStr = "Health: " + player_health;
-        }
-        if (old_maxHealth != player_maxHealth)
-        {
-            old_maxHealth = player_maxHealth;
-            if (player_maxHealth != 0)
-            {
-                playerHealthPercent = (float)player_health / player_maxHealth * 100;
-            }
-        }
-    }
-
-    public static void SetGun1Damage(int value) //Player
-    {
-        damage1 += value;
-    }
-    public static void SetGun2Damage(int value) //Player
-    {
-        damage2 += value;
-    }
-
-    public static void SetLevelProgress(float percent) //MoveCamera
-    {
-        level_progress_percentage = percent;
-    }
-
-    public static void SetPlayerHealth(int value) //Player
-    {
-        player_health = value;
-    }
-
-    public static void SetPlayerMaxHealth(int value) //Player
-    {
-        player_maxHealth = value;
-    }
-
-    public static void EnemyDied(int score_points = 0) //Enemy
-    {
-        scores += score_points;
     }
 }

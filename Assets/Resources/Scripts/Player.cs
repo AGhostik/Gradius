@@ -6,12 +6,7 @@ public class Player : Destroyable {
 
     [Header("Stats")]
     [Range(0f,5f)]
-    public float speed = 1.2f;     
-
-    [Header("Animation")]
-    public Sprite NormalSprite;
-    public Sprite UpSprite;
-    public Sprite DownSprite;
+    public float speed = 1.2f;
 
     private int old_health;
     private int old_maxHealth;
@@ -22,46 +17,39 @@ public class Player : Destroyable {
     private Vector3 pos_min;
     private Vector3 pos_max;
     private Camera main_cam;
-    private SpriteRenderer render;
-    private EventController.playerHealth sendHealth = UIDraw.SetPlayerHealth;
-    private EventController.playerHealth sendMaxHealth = UIDraw.SetPlayerMaxHealth;
 
     // Use this for initialization
     void Start()
     {
+        Amination_OnStart();
         thisTransform = transform;
         main_cam = Camera.main;
-        render = gameObject.GetComponent<SpriteRenderer>();
 
         health = max_health;
         old_health = health;
         old_maxHealth = max_health;
 
-        sendHealth(health);
-        sendMaxHealth(max_health);
+        EventController.addPlayerCurrentHealth(health);
+        EventController.addPlayerMaxHealth(max_health);
     }
 	
 	// Update is called once per frame
-	void Update () {
-        //thisTransform.position += new Vector3(Time.deltaTime,0,0);
+	void Update ()
+    {
+        if (old_health != health)
+        {
+            EventController.addPlayerCurrentHealth(health - old_health);
+            old_health = health;
+        }
+        if (old_maxHealth != max_health)
+        {
+            EventController.addPlayerMaxHealth(max_health - old_maxHealth);
+            old_maxHealth = max_health;
+        }
 
         if (health <= 0)
         {
-            sendHealth(0);
             Die();
-        }
-        else
-        {
-            if (old_health != health)
-            {
-                sendHealth(health);
-                old_health = health;
-            }
-            if (old_maxHealth != max_health)
-            {
-                sendMaxHealth(max_health);
-                old_maxHealth = max_health;
-            }
         }
 
         pos_min = main_cam.ScreenToWorldPoint(new Vector3 (0,0,0));
@@ -71,6 +59,28 @@ public class Player : Destroyable {
         inputY = Input.GetAxis("Vertical") * 3;
 
         flyInput();
+    }
+
+    private void OnEnable()
+    {
+        EventController.Input_Horizontal += takeInput_H;
+        EventController.Input_Vertical += takeInput_V;
+    }
+
+    private void OnDisable()
+    {
+        EventController.Input_Horizontal -= takeInput_H;
+        EventController.Input_Vertical -= takeInput_V;
+    }
+
+    private void takeInput_H(float value)
+    {
+        inputX = value;
+    }
+
+    private void takeInput_V(float value)
+    {
+        inputY = value;
     }
 
     private void flyInput()
@@ -107,27 +117,27 @@ public class Player : Destroyable {
             }
         }
 
-        changeSprite(deltaY);
+        PlayerAnimation(deltaY);
 
         thisTransform.position += new Vector3(deltaX * speed, deltaY * speed, 0);
     }
 
-    private void changeSprite(float vertical)
+    private void PlayerAnimation(float vertical)
     {
-        if (UpSprite != null && DownSprite != null)
+        if (frames.Length >= 3)
         {
             if (vertical < -0.01f)
             {
-                render.sprite = DownSprite;
+                changeFrame(2); //DownSprite
             }
             else
             if (vertical > 0.01f)
             {
-                render.sprite = UpSprite;
+                changeFrame(0); //UpSprite
             }
             else
             {
-                render.sprite = NormalSprite;
+                changeFrame(1); //NormalSprite
             }
         }
     }
