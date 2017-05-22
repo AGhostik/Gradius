@@ -17,6 +17,8 @@ public class Projectile : MonoBehaviour {
     public bool Sin = false;
     public float frequency = 1;  // Speed of sine movement
     public float magnitude = 1;   // Size of sine movement
+    [Range(0f,1f)]
+    public float addRandomMagnitude = 0;
 
     [Header("Animation")]
     public GameObject pierceEffect;
@@ -26,6 +28,7 @@ public class Projectile : MonoBehaviour {
     private Vector3 startPos;
     private float currentDistance;
 
+    [HideInInspector()]
     public float angle_perpend;
 
     private Vector3 axis;
@@ -37,6 +40,8 @@ public class Projectile : MonoBehaviour {
     void Start () {
         thisTransform = transform;
         startPos = thisTransform.position;
+
+        magnitude += Random.Range(0, addRandomMagnitude);
 
         thisTransform.localEulerAngles = new Vector3(0, 0, angle);
         axis = axisAngle(angle);
@@ -53,11 +58,10 @@ public class Projectile : MonoBehaviour {
         {
             Die(0);
         }
-
         rangeRemain();
-        rangeCheck();
-        thisTransform.eulerAngles += new Vector3(0, 0, Time.deltaTime);
-        Direction();
+        rangeCheck();   
+        
+        moveDirection();
 	}
 
     public void checkDie()
@@ -73,7 +77,7 @@ public class Projectile : MonoBehaviour {
         }
     }
 
-    private void Direction()
+    private void moveDirection()
     {
         if (Sin)
         {
@@ -99,17 +103,16 @@ public class Projectile : MonoBehaviour {
 
     private void Die(int effectType = 0)
     {
-        switch (effectType)
+        if (effectType == 1)
         {
-            case 1:
             instantianeExplosion(hit_dieEffect);
-                break;
-            case 2:
-                instantianeExplosion(range_dieEffect);
-                break;
-            default:
-                break;
         }
+        else
+        if (effectType == 2)
+        {
+            instantianeExplosion(range_dieEffect);
+        }
+
         Destroy(gameObject);
     }
 
@@ -117,7 +120,7 @@ public class Projectile : MonoBehaviour {
     {
         if (expl != null)
         {
-            GameObject exp = Instantiate(hit_dieEffect);
+            GameObject exp = Instantiate(expl);
             exp.transform.position = thisTransform.position;
             exp.GetComponent<Explosion>().axis = axis;
         }

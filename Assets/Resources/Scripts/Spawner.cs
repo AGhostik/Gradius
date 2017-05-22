@@ -6,13 +6,13 @@ public class Spawner : MonoBehaviour {
     
     public Wave[] waves;
 
-    private int wave_counter = -1;
+    private int wave_counter = 0;
     private float current_pauseTimer;
     private Wave current_wave;
 
     // Use this for initialization
     void Start () {
-        current_pauseTimer = waves[0].pause;
+        current_pauseTimer = waves[0].Pause;
 	}
 	
 	// Update is called once per frame
@@ -23,34 +23,37 @@ public class Spawner : MonoBehaviour {
             {
                 spawn();
             }
-        }
-        current_pauseTimer -= Time.deltaTime;
+            else
+            {
+                current_pauseTimer -= Time.deltaTime;
+            }
+        }        
 	}
 
     private void spawn()
     {
+        current_wave = waves[wave_counter];        
+        foreach (EnemySpawn current_enemySpawn in current_wave.wave)
+        {
+            if (current_enemySpawn.Enemy != null && current_enemySpawn.GroupObject != null)
+            {
+                GameObject enemy;
+                foreach (GameObject sp in current_enemySpawn.SpawnPoint)
+                {
+                    if (sp == null)
+                    {
+                        break;
+                    }
+                    enemy = Instantiate(current_enemySpawn.Enemy);
+                    enemy.transform.position = sp.transform.position;
+                    enemy.transform.SetParent(current_enemySpawn.GroupObject.transform);
+                }
+            }
+        }        
         wave_counter++;
         if (wave_counter < waves.Length)
         {
-            current_wave = waves[wave_counter];
-            foreach (EnemySpawn current_enemySpawn in current_wave.wave)
-            {
-                if (current_enemySpawn.Enemy != null && current_enemySpawn.GroupObject != null)
-                {
-                    GameObject enemy;
-                    foreach (GameObject sp in current_enemySpawn.SpawnPoint)
-                    {
-                        if (sp == null)
-                        {
-                            break;
-                        }
-                        enemy = Instantiate(current_enemySpawn.Enemy);
-                        enemy.transform.position = sp.transform.position;
-                        enemy.transform.SetParent(current_enemySpawn.GroupObject.transform);
-                    }
-                }
-            }                   
-            current_pauseTimer = waves[wave_counter].pause;
+            current_pauseTimer = waves[wave_counter].Pause;
         }
     }
 }
@@ -58,8 +61,8 @@ public class Spawner : MonoBehaviour {
 [System.Serializable]
 public class Wave
 {
-    public EnemySpawn[] wave;
-    public float pause = 0;
+    public float Pause = 0;
+    public EnemySpawn[] wave;    
 }
 
 [System.Serializable]

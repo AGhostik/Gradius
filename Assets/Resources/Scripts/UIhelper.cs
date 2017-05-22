@@ -125,6 +125,11 @@ public class Image
         DrawAndResizeBody(texture, startX, startY, 0, 0);
     }
 
+    public void DrawPart(int startX, int startY, int part_startX, int part_startY, int part_width, int part_height)
+    {
+        DrawPartBody(texture, startX, startY, part_startX, part_startY, part_width, part_height);
+    }
+
     /// <summary>
     /// Draw texture at (startX;startY) with new width and height
     /// </summary>
@@ -202,6 +207,39 @@ public class Image
             new_width * scale,
             new_height * scale),
             txt, ScaleMode.StretchToFill);
+    }
+    private void DrawPartBody(Texture txt, int startX, int startY, int part_startX, int part_startY, int part_width, int part_height)
+    {
+        int new_startX = startX;
+        int new_startY = startY;
+
+        float new_part_startX = 1f - (float)(txt.width - part_startX)/txt.width;
+        float new_part_startY = 1f - (float)(txt.height - part_startY)/txt.height;
+        float new_width = ((float)part_width / txt.width);
+        float new_height = ((float)part_height / txt.height);
+     
+
+        Rect pos;
+        Rect texC;
+
+        if (align_bottom)
+        {
+            new_startY = screen_height - startY - part_height;
+        }
+        if (align_right)
+        {
+            new_startX = screen_width - startX - part_width;
+        }
+
+        pos = new Rect(
+            new_startX * scale,
+            new_startY * scale,
+            txt.width * new_width * scale,
+            txt.height * new_height * scale);
+
+        texC = new Rect(new_part_startX, new_part_startY, new_width, new_height);
+
+        GUI.DrawTextureWithTexCoords(pos, txt, texC);
     }
     private void DrawAndResizePartiallyBody(Texture txt, int startX, int startY, int width, int height, float percent, bool horizontal, bool vertical)
     {

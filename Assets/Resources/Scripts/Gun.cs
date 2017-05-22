@@ -2,10 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum InputAxis
+{
+    A, B, X, Y
+}
+
 public class Gun : MonoBehaviour {
-    
+
     [Header("Ammunition")]
-    public List<GameObject> Projectiles;    
+    public List<GameObject> Projectiles;
+
+    [Header("Sound")]
+    public List<AudioClip> shotSound;
+    [Range(0f, 5f)]
+    public float volume = 1;
 
     [Header("Start position")]
     public GameObject muzzle;
@@ -14,35 +24,76 @@ public class Gun : MonoBehaviour {
     [Header("Stats")]
     public int damageUP = 0;
     public float firerate = 1;
+    public float firerateCap = 0.1f;
     public int shotsBetweenPause = 3;
     public float pause_length = 0;
 
     [Header("Rotate projectile")]
     public bool rotate = false;
-    public float angle = 0;
+    public bool clockwise = false;
+    public float minAngle = 0;
+    public float maxAngle = 360;
     public float rotate_speed = 30;
 
-    [Header("Control")]    
+    [Header("Control")]
     public bool autoShot = true;
-    public string inputAxisName = "X";
+    public InputAxis input;
 
-    private int shot_count = 0;
-    private int projectile_level = 0;
+    [HideInInspector()]
+    public int projectile_level = 0;
+    [HideInInspector()]
+    public bool canUpgrade = true;
+    [HideInInspector()]
+    public bool canFirerateUp = true;
+
+    private float angle = 0;
+    private bool old_autoShot;
+    private int shot_count = 0;    
     private float firerate1_timer = 0;
-    private float pause_timer = 0;    
+    private float pause_timer = 0;
 
+    private AudioSource audi;
     private Transform gun_transform;
     private Transform muzzle_transform;
 
     // Use this for initialization
     void Start () {
         gun_transform = transform;
+        audi = GetComponent<AudioSource>();
         muzzle_transform = muzzle == null ? null : muzzle.transform;
+        old_autoShot = autoShot;
+        if (transform.parent != null && transform.parent.tag == "Player")
+        {
+            if (gun_transform.name == "Gun1")
+            {
+                EventController.setGun1Damage(damageUP + Projectiles[projectile_level].GetComponent<Projectile>().damage);
+                EventController.setGun1Firerate(firerate);
+            }
+            if (gun_transform.name == "Gun2")
+            {
+                EventController.setGun2Damage(damageUP + Projectiles[projectile_level].GetComponent<Projectile>().damage);
+                EventController.setGun2Firerate(firerate);
+            }
+        }
+        angle = minAngle;
 	}
     
     // Update is called once per frame
     void Update () {
         updateAngle();
+
+        if (old_autoShot != autoShot)
+        {
+            if (autoShot)
+            {
+                unsubscribeInput();
+            }
+            else
+            {
+                subscribeInput();
+            }
+            old_autoShot = autoShot;
+        }
 
         if (autoShot)
         {
@@ -54,61 +105,126 @@ public class Gun : MonoBehaviour {
     {
         if (!autoShot)
         {
-            switch (inputAxisName)
-            {
-                case "A":
-                    EventController.InputA += Shot;
-                    break;
-                case "B":
-                    EventController.InputB += Shot;
-                    break;
-                case "X":
-                    EventController.InputX += Shot;
-                    break;
-                case "Y":
-                    EventController.InputY += Shot;
-                    break;
-            }
+            subscribeInput();
         }
     }
 
     private void OnDisable()
     {
-        switch (inputAxisName)
+        unsubscribeInput();
+    }
+
+    public void firerateUp(float value)
+    {
+        if (firerate > firerateCap)
         {
-            case "A":
-                EventController.InputA -= Shot;
-                break;
-            case "B":
-                EventController.InputB -= Shot;
-                break;
-            case "X":
-                EventController.InputX -= Shot;
-                break;
-            case "Y":
-                EventController.InputY -= Shot;
-                break;
+            if (firerate - value > firerateCap)
+            {
+                firerate -= value;
+            }
+            else
+            {
+                firerate = firerateCap;
+                canFirerateUp = false;
+            }
+            if (gun_transform.name == "Gun1")
+            {
+                EventController.setGun1Firerate(firerate);
+            }
+            if (gun_transform.name == "Gun2")
+            {
+                EventController.setGun2Firerate(firerate);
+            }
         }
     }
 
-    private void upgradeGun()
+    public void upgradeGun()
     {
         if (projectile_level < Projectiles.Count - 1)
         {
             projectile_level++;
+
+            //как-то стыдно за такие сточки, нудаладна, и так сойдет
+            if (gun_transform.name == "Gun1")
+            {
+                EventController.playerGun1LevelUP();
+            }
+            if (gun_transform.name == "Gun2")
+            {
+                EventController.playerGun2LevelUP();
+            }
+
+            if (projectile_level == Projectiles.Count - 1)
+            {
+                canUpgrade = false;
+            }
         }
     }
 
+    private void subscribeInput()
+    {
+        switch (input)
+        {
+            case InputAxis.A:
+                EventController.InputA += Shot;
+                break;
+            case InputAxis.B:
+                EventController.InputB += Shot;
+                break;
+            case InputAxis.X:
+                EventController.InputX += Shot;
+                break;
+            case InputAxis.Y:
+                EventController.InputY += Shot;
+                break;
+        }
+    }
+
+    private void unsubscribeInput()
+    {
+        switch (input)
+        {
+            case InputAxis.A:
+                EventController.InputA -= Shot;
+                break;
+            case InputAxis.B:
+                EventController.InputB -= Shot;
+                break;
+            case InputAxis.X:
+                EventController.InputX -= Shot;
+                break;
+            case InputAxis.Y:
+                EventController.InputY -= Shot;
+                break;
+        }
+    }
+    
     private void updateAngle()
     {
         if (rotate)
-        {
-            angle += rotate_speed * Time.deltaTime;
+        {     
+            float delta = rotate_speed * Time.deltaTime;
+            if (clockwise)
+            {
+                angle += delta;
+                if (angle < minAngle || angle > maxAngle)
+                {
+                    angle = minAngle;
+                }
+            }
+            else
+            {
+                angle -= delta;
+                if (angle < minAngle || angle > maxAngle)
+                {
+                    angle = maxAngle;
+                }
+            }
         }
 
-        if (angle >= 360)
+        if (angle > maxAngle)
         {
-            angle -= 360;
+            angle -= maxAngle;
         }
     }
 
@@ -136,6 +252,8 @@ public class Gun : MonoBehaviour {
         {
             Instantiate(bullet).transform.position = comp.transform.position;
         }
+
+        playSound();
     }
 
     private void Shot()
@@ -167,6 +285,17 @@ public class Gun : MonoBehaviour {
                 {
                     pause_timer += Time.deltaTime;
                 }
+            }
+        }
+    }
+
+    private void playSound()
+    {
+        if (shotSound.Count > 0)
+        {
+            if (shotSound[projectile_level] != null && volume > 0)
+            {
+                audi.PlayOneShot(shotSound[projectile_level], volume);
             }
         }
     }

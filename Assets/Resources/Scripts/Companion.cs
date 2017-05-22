@@ -19,10 +19,12 @@ public class Companion : AnimatedObject {
 
     // Use this for initialization
     void Start () {
+        Amination_OnStart();
         thisTransform = transform;
-
         parentTransform = parent.transform;
         oldParentPos = parentTransform.position;
+        thisTransform.SetParent(Camera.main.transform);
+        takeCamSpeed(Camera.main.GetComponent<MoveCamera>().speed);
     }
 
     private void OnEnable()
@@ -52,6 +54,8 @@ public class Companion : AnimatedObject {
         {
             Destroy(gameObject);
         }
+
+        timerAnimation();
 	}
 
     private void takeCamSpeed(float value)
@@ -76,7 +80,7 @@ public class Companion : AnimatedObject {
             if (posList.Count == posListLength)
             {
                 thisTransform.position = posList[0];
-                posList.RemoveAt(0);                
+                posList.RemoveAt(0);
             }
 
             posList.Add(parentTransform.position);

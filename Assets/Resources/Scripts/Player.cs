@@ -7,9 +7,8 @@ public class Player : Destroyable {
     [Header("Stats")]
     [Range(0f,5f)]
     public float speed = 1.2f;
+    public float maxSpeed = 3;
 
-    private int old_health;
-    private int old_maxHealth;
     private float inputX;
     private float inputY;
     private float deltaX = 0;
@@ -17,29 +16,23 @@ public class Player : Destroyable {
     private Vector3 pos_min;
     private Vector3 pos_max;
     private Camera main_cam;
-
-    // Use this for initialization
+    
     void Start()
     {
-        Amination_OnStart();
-        thisTransform = transform;
-        main_cam = Camera.main;
-
-        health = max_health;
-        old_health = health;
-        old_maxHealth = max_health;
+        Amination_OnStart();  
+        main_cam = Camera.main;        
+        Destroyable_OnStart();        
 
         EventController.addPlayerCurrentHealth(health);
         EventController.addPlayerMaxHealth(max_health);
+        EventController.addPlayerSpeed(speed);
     }
-	
-	// Update is called once per frame
 	void Update ()
     {
         if (old_health != health)
         {
-            EventController.addPlayerCurrentHealth(health - old_health);
-            old_health = health;
+            EventController.addPlayerCurrentHealth(health - old_health);            
+            old_health = health;            
         }
         if (old_maxHealth != max_health)
         {
@@ -52,9 +45,6 @@ public class Player : Destroyable {
             Die();
         }
 
-        pos_min = main_cam.ScreenToWorldPoint(new Vector3 (0,0,0));
-        pos_max = main_cam.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
-
         inputX = Input.GetAxis("Horizontal") * 3;
         inputY = Input.GetAxis("Vertical") * 3;
 
@@ -65,12 +55,26 @@ public class Player : Destroyable {
     {
         EventController.Input_Horizontal += takeInput_H;
         EventController.Input_Vertical += takeInput_V;
+        EventController.UpdateCameraWorldPoint_TL += takeCamWP_TL;
+        EventController.UpdateCameraWorldPoint_BR += takeCamWP_BR;
     }
 
     private void OnDisable()
     {
         EventController.Input_Horizontal -= takeInput_H;
         EventController.Input_Vertical -= takeInput_V;
+        EventController.UpdateCameraWorldPoint_TL -= takeCamWP_TL;
+        EventController.UpdateCameraWorldPoint_BR -= takeCamWP_BR;
+    }
+
+    private void takeCamWP_TL(Vector3 vector)
+    {
+        pos_min = vector;
+    }
+
+    private void takeCamWP_BR(Vector3 vector)
+    {
+        pos_max = vector;
     }
 
     private void takeInput_H(float value)

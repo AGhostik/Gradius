@@ -18,9 +18,8 @@ public class Enemy : Destroyable {
     public int score = 5;
 
     // Use this for initialization
-    void Start () {        
-        thisTransform = transform;
-        health = max_health;
+    void Start () {
+        Destroyable_OnStart();
 
         if (ai_current == AI.Fan)
         {
