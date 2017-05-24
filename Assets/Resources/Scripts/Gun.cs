@@ -62,19 +62,6 @@ public class Gun : MonoBehaviour {
         audi = GetComponent<AudioSource>();
         muzzle_transform = muzzle == null ? null : muzzle.transform;
         old_autoShot = autoShot;
-        if (transform.parent != null && transform.parent.tag == "Player")
-        {
-            if (gun_transform.name == "Gun1")
-            {
-                EventController.setGun1Damage(damageUP + Projectiles[projectile_level].GetComponent<Projectile>().damage);
-                EventController.setGun1Firerate(firerate);
-            }
-            if (gun_transform.name == "Gun2")
-            {
-                EventController.setGun2Damage(damageUP + Projectiles[projectile_level].GetComponent<Projectile>().damage);
-                EventController.setGun2Firerate(firerate);
-            }
-        }
         angle = minAngle;
 	}
     
@@ -134,29 +121,6 @@ public class Gun : MonoBehaviour {
             if (gun_transform.name == "Gun2")
             {
                 EventController.setGun2Firerate(firerate);
-            }
-        }
-    }
-
-    public void upgradeGun()
-    {
-        if (projectile_level < Projectiles.Count - 1)
-        {
-            projectile_level++;
-
-            //как-то стыдно за такие сточки, нудаладна, и так сойдет
-            if (gun_transform.name == "Gun1")
-            {
-                EventController.playerGun1LevelUP();
-            }
-            if (gun_transform.name == "Gun2")
-            {
-                EventController.playerGun2LevelUP();
-            }
-
-            if (projectile_level == Projectiles.Count - 1)
-            {
-                canUpgrade = false;
             }
         }
     }
@@ -252,7 +216,7 @@ public class Gun : MonoBehaviour {
         {
             Instantiate(bullet).transform.position = comp.transform.position;
         }
-
+        
         playSound();
     }
 

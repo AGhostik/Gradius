@@ -15,6 +15,6 @@ public class Spacerender : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        render.material.mainTextureOffset = new Vector2(-1 * Time.time * speed, 0);
+        render.material.mainTextureOffset = new Vector2(Time.time * -speed, 0);
     }
 }

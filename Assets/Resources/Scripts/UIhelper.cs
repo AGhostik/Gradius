@@ -7,7 +7,9 @@ public class UIhelper
 
     public UIhelper()
     {
-    }
+        screen_width = Screen.width;
+        screen_height = Screen.height;
+}
     public UIhelper(float ui_scale)
     {
         if (ui_scale > 0)
@@ -42,8 +44,8 @@ public class UIhelper
     //var
     protected float scale = 1f;
 
-    protected int screen_width = 1;
-    protected int screen_height = 1;
+    protected int screen_width;
+    protected int screen_height;
     //
 
     /// <summary>
@@ -174,7 +176,42 @@ public class Image
         DrawProgresbarBody(texture, lineTexture, startX, startY, percent, horizontal, vertical);
     }
 
-    //Private:
+    //Private:    
+    private void DrawPartBody(Texture txt, int startX, int startY, int part_startX, int part_startY, int part_width, int part_height)
+    {
+        int txt_width = txt.width;
+        int txt_height = txt.height;
+
+        int new_startX = startX;
+        int new_startY = startY;
+
+        float new_part_startX = 1f - (float)(txt_width - part_startX)/txt_width;
+        float new_part_startY = 1f - (float)(txt_height - part_startY)/txt_height;
+        float new_width = ((float)part_width / txt_width);
+        float new_height = ((float)part_height / txt_height);
+
+        Rect pos;
+        Rect texC;
+
+        if (align_bottom)
+        {
+            new_startY = screen_height - startY - part_height;
+        }
+        if (align_right)
+        {
+            new_startX = screen_width - startX - part_width;
+        }
+
+        pos = new Rect(
+            new_startX * scale,
+            new_startY * scale,
+            txt_width * new_width * scale,
+            txt_height * new_height * scale);
+
+        texC = new Rect(new_part_startX, new_part_startY, new_width, new_height);
+
+        GUI.DrawTextureWithTexCoords(pos, txt, texC);
+    }
     private void DrawAndResizeBody(Texture txt, int startX, int startY, int width, int height)
     {
         int new_width = txt.width;
@@ -194,7 +231,7 @@ public class Image
 
         if (align_bottom)
         {
-            new_startY = screen_height - startY - new_height;            
+            new_startY = screen_height - startY - new_height;
         }
         if (align_right)
         {
@@ -207,39 +244,6 @@ public class Image
             new_width * scale,
             new_height * scale),
             txt, ScaleMode.StretchToFill);
-    }
-    private void DrawPartBody(Texture txt, int startX, int startY, int part_startX, int part_startY, int part_width, int part_height)
-    {
-        int new_startX = startX;
-        int new_startY = startY;
-
-        float new_part_startX = 1f - (float)(txt.width - part_startX)/txt.width;
-        float new_part_startY = 1f - (float)(txt.height - part_startY)/txt.height;
-        float new_width = ((float)part_width / txt.width);
-        float new_height = ((float)part_height / txt.height);
-     
-
-        Rect pos;
-        Rect texC;
-
-        if (align_bottom)
-        {
-            new_startY = screen_height - startY - part_height;
-        }
-        if (align_right)
-        {
-            new_startX = screen_width - startX - part_width;
-        }
-
-        pos = new Rect(
-            new_startX * scale,
-            new_startY * scale,
-            txt.width * new_width * scale,
-            txt.height * new_height * scale);
-
-        texC = new Rect(new_part_startX, new_part_startY, new_width, new_height);
-
-        GUI.DrawTextureWithTexCoords(pos, txt, texC);
     }
     private void DrawAndResizePartiallyBody(Texture txt, int startX, int startY, int width, int height, float percent, bool horizontal, bool vertical)
     {
@@ -299,8 +303,13 @@ public class Image
     }
     private void DrawProgresbarBody(Texture txt, Texture lineTexture, int startX, int startY, float percent, bool horizontal, bool vertical)
     {
-        int differenceX = (txt.width > lineTexture.width ? ((txt.width - lineTexture.width) / 2) : 0);
-        int differenceY = (txt.height > lineTexture.height ? ((txt.height - lineTexture.height) / 2) : 0);
+        int txt_width = txt.width;
+        int txt_height = txt.height;
+        int lineTexture_width = lineTexture.width;
+        int lineTexture_height = lineTexture.height;
+
+        int differenceX = (txt_width > lineTexture_width ? ((txt_width - lineTexture_width) / 2) : 0);
+        int differenceY = (txt_height > lineTexture_height ? ((txt_height - lineTexture_height) / 2) : 0);
 
         DrawAndResizeBody(txt, startX, startY, 0, 0);
         DrawAndResizePartiallyBody(lineTexture, startX + differenceX, startY + differenceY, 0, 0, percent, horizontal, vertical);
@@ -317,10 +326,8 @@ public class Label
     {
         text = label_arg;
         scale = scale_arg;
-
-        style.fontSize = (int)(2 * scale);
+        
         style.normal.textColor = Color.white;
-        style.stretchWidth = true;
     }
     ~Label() { }
 
@@ -331,13 +338,6 @@ public class Label
     {
         style.fontSize = (int)(font_size * scale);
         GUI.Label(new Rect(startX * scale, startY * scale, 1 * scale, 1 * scale), text, style);
-
-        //Vector2 size = style.CalcSize(new GUIContent(text));
-        //Debug.Log(size/scale + " " + text);
-    }
-    public void Draw(int startX, int startY, int width, int height)
-    {
-        GUI.Label(new Rect(startX * scale, startY * scale, width * scale, height * scale), text, style);
     }
 
     /// <summary>

@@ -8,6 +8,7 @@ public class EventController : MonoBehaviour
     public delegate void intMethod(int value);
     public delegate void floatMethod(float value);
     public delegate void vector3Method(Vector3 vector);
+    public delegate void gameObjectMethod(GameObject obj);
 
     public static event voidMethod InputA = delegate { };
     public static event voidMethod InputB = delegate { };
@@ -16,16 +17,18 @@ public class EventController : MonoBehaviour
 
     public static event floatMethod Input_Horizontal = delegate { };
     public static event floatMethod Input_Vertical = delegate { };
-    
+
     public static event intMethod UpdatePlayerHealth = delegate { };
     public static event intMethod UpdatePlayerMaxHealth = delegate { };
-    public static event intMethod UpdatePlayerGun1Damage = delegate { }; 
-    public static event intMethod UpdatePlayerGun2Damage = delegate { }; 
-    public static event intMethod UpdatePlayerGun1Level = delegate { }; 
+    public static event intMethod UpdatePlayerGun1Damage = delegate { };
+    public static event intMethod UpdatePlayerGun2Damage = delegate { };
+    public static event intMethod UpdatePlayerGun1Level = delegate { };
     public static event intMethod UpdatePlayerGun2Level = delegate { };
     public static event floatMethod UpdatePlayerGun1Firerate = delegate { };
     public static event floatMethod UpdatePlayerGun2Firerate = delegate { };
-    public static event floatMethod UpdatePlayerSpeed = delegate { }; //
+    public static event floatMethod UpdatePlayerSpeed = delegate { };
+
+    public static event gameObjectMethod PlayerGotHit = delegate { };
 
     public static event intMethod UpdateScores = delegate { };
     public static event floatMethod UpdateLevelProgress = delegate { };
@@ -37,6 +40,8 @@ public class EventController : MonoBehaviour
     public Camera mainCamera;
 
     //var static
+    private static List<GameObject> playerHit = new List<GameObject>();
+
     private static int scores = 0;
     
     private static float level_progress = 0;
@@ -52,9 +57,6 @@ public class EventController : MonoBehaviour
     private static float player_speed = 0;
     private static int player_max_health = 0;
     private static int player_current_health = 0;
-
-    private Vector3 camera_worldPoint_TL;
-    private Vector3 camera_worldPoint_BR;
     //end var static
 
     //var
@@ -74,13 +76,23 @@ public class EventController : MonoBehaviour
     private int old_player_max_health = -1;
     private int old_player_current_health = -1;
 
+
     private float input_H;
     private float input_V;
+    private float old_input_H;
+    private float old_input_V;
+    private Vector3 camera_worldPoint_TL;
+    private Vector3 camera_worldPoint_BR;
     //end var
 
     private void Start()
     {
         mainCamera = Camera.main;
+
+        if (Screen.fullScreen)
+        {
+            Cursor.visible = false;
+        }
     }
 
     private void Update()
@@ -93,13 +105,15 @@ public class EventController : MonoBehaviour
             Application.Quit();
         }
 
-        if (input_H != 0)
+        if (input_H != old_input_H)
         {
             Input_Horizontal(input_H);
+            old_input_H = input_H;
         }
-        if (input_V != 0)
+        if (input_V != old_input_V)
         {
             Input_Vertical(input_V);
+            old_input_V = input_V;
         }
 
         if (Input.GetAxisRaw("A") != 0)
@@ -198,6 +212,17 @@ public class EventController : MonoBehaviour
             old_camera_speed = camera_speed;
             UpdateCameraSpeed(camera_speed);
         }
+
+        //player hit
+        if (playerHit.Count > 0)
+        {
+            foreach (GameObject obj in playerHit)
+            {
+                if (obj != null)
+                    PlayerGotHit(obj);
+            }
+            playerHit.Clear();
+        }
     }
 
     public static void addScore(int value)
@@ -262,7 +287,12 @@ public class EventController : MonoBehaviour
         camera_speed = value;
     }
 
-    
+    public static void playerHitAdd(GameObject obj)
+    {
+        playerHit.Add(obj);
+    }
+
+
     private void updateCameraWorldPoints()
     {
         camera_worldPoint_TL = mainCamera.ScreenToWorldPoint(new Vector3(0, 0, 0));

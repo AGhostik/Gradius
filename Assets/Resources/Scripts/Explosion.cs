@@ -33,13 +33,14 @@ public class Explosion : MonoBehaviour {
         aud = GetComponent<AudioSource>();
         timer_start = TTL / explosion.Length;
         timer = timer_start;
+        axis *= axisMultiplier;
         changeFrame();
     }    
 
     // Update is called once per frame
     void Update () {
         Die();
-        thisTransform.position += axis * axisMultiplier * Time.deltaTime;        
+        thisTransform.position += axis * Time.deltaTime;        
     }
 
     private void playSound()

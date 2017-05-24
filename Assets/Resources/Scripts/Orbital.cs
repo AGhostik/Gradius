@@ -9,6 +9,7 @@ public class Orbital : AnimatedObject
     public float rotationSpeed = 90;
 
     private Transform thisTransform;
+    private Transform parentTransform;
     private Vector3 rotationMask;
 
     // Use this for initialization
@@ -16,13 +17,14 @@ public class Orbital : AnimatedObject
     {
         Amination_OnStart();
         thisTransform = transform;
+        parentTransform = parent.transform;
         rotationMask = new Vector3(0, 0, 1);
     }
 
     // Update is called once per frame
     void Update()
     {
-        thisTransform.RotateAround(parent.transform.position, rotationMask, rotationSpeed * Time.deltaTime);
+        thisTransform.RotateAround(parentTransform.position, rotationMask, rotationSpeed * Time.deltaTime);
         timerAnimation();
     }
     
@@ -32,6 +34,7 @@ public class Orbital : AnimatedObject
         if (hitObject.tag == "EnemyProjectile")
         {
             Projectile bullet = hitObject.GetComponent<Projectile>();
+            bullet.mute_hitEffect = true;
             bullet.checkDie();
         }
     }

@@ -18,6 +18,9 @@ public class Playerghost : MonoBehaviour {
         {
             Destroy(gameObject);
         }
-        thisTransform.position = player.transform.position;
+        else
+        {
+            thisTransform.position = player.transform.position;
+        }
 	}
 }

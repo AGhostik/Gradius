@@ -17,11 +17,8 @@ public class MoveCamera : MonoBehaviour {
     void Start () {
         thisTransform = transform;
         _speed = speed;
-        old_stopState = !stop;
-        if (Screen.fullScreen)
-        {
-            Cursor.visible = false;
-        }
+        EventController.setCamSpeed(speed);
+        old_stopState = !stop;        
     }
 	
 	// Update is called once per frame
