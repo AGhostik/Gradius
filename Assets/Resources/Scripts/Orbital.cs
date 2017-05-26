@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Orbital : AnimatedObject
 {
-
-    public GameObject parent;
     public float rotationSpeed = 90;
 
     private Transform thisTransform;
@@ -17,7 +15,7 @@ public class Orbital : AnimatedObject
     {
         Amination_OnStart();
         thisTransform = transform;
-        parentTransform = parent.transform;
+        parentTransform = transform.parent.transform;
         rotationMask = new Vector3(0, 0, 1);
     }
 
@@ -34,7 +32,7 @@ public class Orbital : AnimatedObject
         if (hitObject.tag == "EnemyProjectile")
         {
             Projectile bullet = hitObject.GetComponent<Projectile>();
-            bullet.mute_hitEffect = true;
+            bullet.muteHitEffect = true;
             bullet.checkDie();
         }
     }

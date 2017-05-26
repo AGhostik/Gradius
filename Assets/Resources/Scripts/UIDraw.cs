@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class UIDraw : MonoBehaviour {
 
-    public Texture progres_border;
-    public Texture progres_line;
+    //public Texture progres_border;
+    //public Texture progres_line;
 
-    public Texture speedIcon;
-    public List<Texture> gun1Icon;
-    public Texture gun2Icon;
-    public Texture upgrade1Icon;
-    public Texture upgrade2Icon;
+    //public Texture speedIcon;
+    //public List<Texture> gun1Icon;
+    //public Texture gun2Icon;
+    //public Texture upgrade1Icon;
+    //public Texture upgrade2Icon;
 
     private string gun_damage1Str = string.Empty;
     private string gun_damage2Str = string.Empty;   
@@ -74,10 +74,10 @@ public class UIDraw : MonoBehaviour {
 
     void OnGUI()
     {
-        drawer.texture(progres_border).DrawProgresbar(progres_line, 2, 2, level_progress);
-        drawer.texture(progres_border).DrawProgresbar(progres_line, 35, 2, playerHealthPercent);
-        drawer.label(scoresStr).Draw(2, 11, 5);
-        drawer.label(healthStr).Draw(35, 11, 5);
+        //drawer.texture(progres_border).DrawProgresbar(progres_line, 2, 2, level_progress);
+        //drawer.texture(progres_border).DrawProgresbar(progres_line, 35, 2, playerHealthPercent);
+        //drawer.label(scoresStr).Draw(2, 11, 5);
+        //drawer.label(healthStr).Draw(35, 11, 5);
 
         /*
         drawer.texture(speedIcon).DrawAndResize(2, 109, 14, 7);
@@ -86,9 +86,11 @@ public class UIDraw : MonoBehaviour {
         drawer.texture(upgrade1Icon).DrawAndResize(2, 130, 14, 7);
         drawer.texture(upgrade2Icon).DrawAndResize(2, 137, 14, 7);
         */
-        drawer.label(player_speedStr).Draw(2, 109, 5);
-        drawer.label(gun_damage1Str).Draw(2, 116, 5);
-        drawer.label(gun_damage2Str).Draw(2, 123, 5);
+        drawer.label(scoresStr).Draw(2, 102, 5);
+        drawer.label(healthStr).Draw(2, 109, 5);
+        drawer.label(player_speedStr).Draw(2, 116, 5);
+        drawer.label(gun_damage1Str).Draw(2, 123, 5);
+        drawer.label(gun_damage2Str).Draw(2, 130, 5);
     }
 
     //scores

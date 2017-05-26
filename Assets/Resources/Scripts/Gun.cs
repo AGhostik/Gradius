@@ -7,80 +7,84 @@ public enum InputAxis
     A, B, X, Y
 }
 
-public class Gun : MonoBehaviour {
-
-    [Header("Ammunition")]
-    public List<GameObject> Projectiles;
-
-    [Header("Sound")]
-    public List<AudioClip> shotSound;
+//not Projectile !!!
+[System.Serializable]
+public class Projectiles
+{
+    public GameObject Projectile;
+    public AudioClip shotSound;
     [Range(0f, 5f)]
     public float volume = 1;
 
+   // [HideInInspector]
+    public int projectileCount = 0;
+    //[HideInInspector]
+    public int currentProjectileNumber = 0;
+    //[HideInInspector]
+    public GameObject[] projectilesCached;
+    //[HideInInspector]
+    public Projectile[] projectilesCachedComponent;
+    //[HideInInspector]
+    public GameObject[] projectilesCached_companion;
+    //[HideInInspector]
+    public Projectile[] projectilesCachedComponent_companion;
+}
+
+public class Gun : MonoBehaviour {
+
+    [Header("Ammunition")]
+    [HideInInspector]
+    public int currentProjectileLevel = 0;
+    public List<Projectiles> ProjectileLevels;
+
     [Header("Start position")]
     public GameObject muzzle;
-    public List<GameObject> Companions;
+    //[HideInInspector]
+    public GameObject Companion;
 
     [Header("Stats")]
     public int damageUP = 0;
+    [Range(0.1f, 10f)]
     public float firerate = 1;
-    public float firerateCap = 0.1f;
+    [Range(0.1f, 10f)]
+    public float firerateCap = 0.1f;    
+    public float pauseLength = 0;
     public int shotsBetweenPause = 3;
-    public float pause_length = 0;
 
     [Header("Rotate projectile")]
     public bool rotate = false;
     public bool clockwise = false;
+    [Range(0f, 359f)]
     public float minAngle = 0;
+    [Range(0f, 359f)]
     public float maxAngle = 360;
-    public float rotate_speed = 30;
+    public float rotateSpeed = 30;
 
     [Header("Control")]
     public bool autoShot = true;
     public InputAxis input;
 
-    [HideInInspector()]
-    public int projectile_level = 0;
-    [HideInInspector()]
-    public bool canUpgrade = true;
-    [HideInInspector()]
-    public bool canFirerateUp = true;
+    private int shotCount = 0;
+    private float angle = 0;           
+    private float firerateTimer = 0;
+    private float pauseTimer = 0;
+    
+    private Transform gunTransform;
+    private Transform muzzleTransform;
 
-    private float angle = 0;
-    private bool old_autoShot;
-    private int shot_count = 0;    
-    private float firerate1_timer = 0;
-    private float pause_timer = 0;
-
-    private AudioSource audi;
-    private Transform gun_transform;
-    private Transform muzzle_transform;
-
-    // Use this for initialization
-    void Start () {
-        gun_transform = transform;
-        audi = GetComponent<AudioSource>();
-        muzzle_transform = muzzle == null ? null : muzzle.transform;
-        old_autoShot = autoShot;
+    private AudioSource gunAudio;
+    
+    void Awake () {
+        gunTransform = transform;
+        gunAudio = GetComponent<AudioSource>();
+        muzzleTransform = muzzle == null ? null : muzzle.transform;
         angle = minAngle;
+
+        cacheProjectiles();
 	}
     
-    // Update is called once per frame
     void Update () {
         updateAngle();
-
-        if (old_autoShot != autoShot)
-        {
-            if (autoShot)
-            {
-                unsubscribeInput();
-            }
-            else
-            {
-                subscribeInput();
-            }
-            old_autoShot = autoShot;
-        }
 
         if (autoShot)
         {
@@ -92,59 +96,25 @@ public class Gun : MonoBehaviour {
     {
         if (!autoShot)
         {
-            subscribeInput();
+            switch (input)
+            {
+                case InputAxis.A:
+                    EventController.InputA += Shot;
+                    break;
+                case InputAxis.B:
+                    EventController.InputB += Shot;
+                    break;
+                case InputAxis.X:
+                    EventController.InputX += Shot;
+                    break;
+                case InputAxis.Y:
+                    EventController.InputY += Shot;
+                    break;
+            }
         }
     }
 
     private void OnDisable()
-    {
-        unsubscribeInput();
-    }
-
-    public void firerateUp(float value)
-    {
-        if (firerate > firerateCap)
-        {
-            if (firerate - value > firerateCap)
-            {
-                firerate -= value;
-            }
-            else
-            {
-                firerate = firerateCap;
-                canFirerateUp = false;
-            }
-            if (gun_transform.name == "Gun1")
-            {
-                EventController.setGun1Firerate(firerate);
-            }
-            if (gun_transform.name == "Gun2")
-            {
-                EventController.setGun2Firerate(firerate);
-            }
-        }
-    }
-
-    private void subscribeInput()
-    {
-        switch (input)
-        {
-            case InputAxis.A:
-                EventController.InputA += Shot;
-                break;
-            case InputAxis.B:
-                EventController.InputB += Shot;
-                break;
-            case InputAxis.X:
-                EventController.InputX += Shot;
-                break;
-            case InputAxis.Y:
-                EventController.InputY += Shot;
-                break;
-        }
-    }
-
-    private void unsubscribeInput()
     {
         switch (input)
         {
@@ -167,7 +137,7 @@ public class Gun : MonoBehaviour {
     {
         if (rotate)
         {     
-            float delta = rotate_speed * Time.deltaTime;
+            float delta = rotateSpeed * Time.deltaTime;
             if (clockwise)
             {
                 angle += delta;
@@ -194,60 +164,77 @@ public class Gun : MonoBehaviour {
 
     private void createProjectile()
     {
-        GameObject bullet = Instantiate(Projectiles[projectile_level]);
-        Projectile proj = bullet.GetComponent<Projectile>();
-        proj.damage += damageUP;
+        int i = ProjectileLevels[currentProjectileLevel].currentProjectileNumber;
+        Projectiles pj = ProjectileLevels[currentProjectileLevel];
 
-        if (rotate)
-        {
-            proj.angle = angle;
+        if (pj.projectilesCached[i].activeInHierarchy == false)
+        {            
+            pj.projectilesCachedComponent[i].damage += damageUP;
+
+            if (rotate)
+            {
+                pj.projectilesCachedComponent[i].angle = angle;
+            }
+
+            if (muzzle != null)
+            {
+                pj.projectilesCached[i].transform.position = muzzleTransform.position;
+            }
+            else
+            {
+                pj.projectilesCached[i].transform.position = gunTransform.position;
+            }
+
+            if (Companion != null && Companion.activeInHierarchy == true)
+            {
+                pj.projectilesCached_companion[i].transform.position = Companion.transform.position;
+                pj.projectilesCachedComponent_companion[i].damage += damageUP;
+                pj.projectilesCached_companion[i].SetActive(true);                
+            }
+            pj.projectilesCached[i].SetActive(true);
+            playSound();
         }
+        else
+            Debug.Log("Cant create projectile");
 
-        if (muzzle != null)
+        if (i < ProjectileLevels[currentProjectileLevel].projectileCount - 1)
         {
-            bullet.transform.position = muzzle_transform.position;
+            ProjectileLevels[currentProjectileLevel].currentProjectileNumber++;
         }
         else
         {
-            bullet.transform.position = gun_transform.position;
+            ProjectileLevels[currentProjectileLevel].currentProjectileNumber = 0;
         }
-
-        foreach (GameObject comp in Companions)
-        {
-            Instantiate(bullet).transform.position = comp.transform.position;
-        }
-        
-        playSound();
     }
 
     private void Shot()
     {
-        if (Projectiles.Count > 0 && Projectiles[projectile_level] != null)
+        if (ProjectileLevels.Count > 0 && ProjectileLevels[currentProjectileLevel] != null)
         {
-            if (shot_count < shotsBetweenPause)
+            if (shotCount < shotsBetweenPause)
             {
-                if (firerate1_timer >= firerate)
+                if (firerateTimer >= firerate)
                 {
                     createProjectile();
 
-                    shot_count++;
-                    firerate1_timer = 0;
-                    pause_timer = 0;
+                    shotCount++;
+                    firerateTimer = 0;
+                    pauseTimer = 0;
                 }
                 else
                 {
-                    firerate1_timer += Time.deltaTime;
+                    firerateTimer += Time.deltaTime;
                 }
             }
             else
             {
-                if (pause_timer >= pause_length)
+                if (pauseTimer >= pauseLength)
                 {
-                    shot_count = 0;
+                    shotCount = 0;
                 }
                 else
                 {
-                    pause_timer += Time.deltaTime;
+                    pauseTimer += Time.deltaTime;
                 }
             }
         }
@@ -255,11 +242,121 @@ public class Gun : MonoBehaviour {
 
     private void playSound()
     {
-        if (shotSound.Count > 0)
+        if (ProjectileLevels[currentProjectileLevel].shotSound != null)
         {
-            if (shotSound[projectile_level] != null && volume > 0)
+            if (ProjectileLevels[currentProjectileLevel].shotSound != null && ProjectileLevels[currentProjectileLevel].volume > 0)
             {
-                audi.PlayOneShot(shotSound[projectile_level], volume);
+                gunAudio.PlayOneShot(ProjectileLevels[currentProjectileLevel].shotSound, ProjectileLevels[currentProjectileLevel].volume);
+            }
+        }
+    }
+
+    private void cacheProjectiles()
+    {
+        int projectileArraySize = ProjectileLevels.Count;
+        for (int i = 0; i < projectileArraySize; i++)
+        {
+            int projectileCount;
+            Projectile tempPj = ProjectileLevels[i].Projectile.GetComponent<Projectile>();
+            GameObject pjCollector = new GameObject();
+            GameObject pjCollector_companion = new GameObject();
+            GameObject efCollector = new GameObject();
+            GameObject efCollector_companion = new GameObject();
+
+            pjCollector.name = ProjectileLevels[i].Projectile.name + "_collection";
+            pjCollector_companion.name = ProjectileLevels[i].Projectile.name + "_collection_companion";
+            efCollector.name = ProjectileLevels[i].Projectile.name + "_ef_collection";
+            efCollector_companion.name = ProjectileLevels[i].Projectile.name + "_ef_collection_companion";
+
+            if (pauseLength == 0)
+            {
+                projectileCount = (int)(tempPj.range / (tempPj.speed * firerateCap) + 0.9f);
+            }
+            else
+            {
+                float pauseRange = tempPj.speed * pauseLength;
+                float rangeWoPause = tempPj.range - pauseRange * (int)(tempPj.range / ((shotsBetweenPause ) * firerateCap + pauseRange));
+                projectileCount = (int)(rangeWoPause / (tempPj.speed * firerateCap) + 0.9f);
+            }
+            ProjectileLevels[i].projectilesCached = new GameObject[projectileCount];
+            ProjectileLevels[i].projectilesCachedComponent = new Projectile[projectileCount];
+
+            if (Companion != null)
+            {
+                ProjectileLevels[i].projectilesCached_companion = new GameObject[projectileCount];
+                ProjectileLevels[i].projectilesCachedComponent_companion = new Projectile[projectileCount];
+            }
+            else
+            {
+                Destroy(pjCollector_companion);
+                Destroy(efCollector_companion);
+            }
+
+            ProjectileLevels[i].projectileCount = projectileCount;
+
+            for (int j = 0; j < projectileCount; j++)
+            {
+                //player
+                GameObject temp;
+                temp = Instantiate(ProjectileLevels[i].Projectile, pjCollector.transform);
+                temp.SetActive(false);
+
+                ProjectileLevels[i].projectilesCached[j] = temp;
+                ProjectileLevels[i].projectilesCachedComponent[j] = temp.GetComponent<Projectile>();
+
+                GameObject ef_pierce = ProjectileLevels[i].projectilesCachedComponent[j].pierceEffect_cached;
+                if (ef_pierce != null)
+                {
+                    ef_pierce.transform.SetParent(efCollector.transform);
+                }
+
+                GameObject ef_hit = ProjectileLevels[i].projectilesCachedComponent[j].hitDieEffect_cached;
+                if (ef_hit != null)
+                {
+                    ef_hit.transform.SetParent(efCollector.transform);
+                }
+
+                GameObject ef_range = ProjectileLevels[i].projectilesCachedComponent[j].rangeDieEffect_cached;
+                if (ef_range != null)
+                {
+                    ef_range.transform.SetParent(efCollector.transform);
+                }
+
+                //companion
+                if (Companion != null)
+                {
+                    temp = Instantiate(ProjectileLevels[i].Projectile, pjCollector_companion.transform);
+                    temp.SetActive(false);                    
+                    ProjectileLevels[i].projectilesCached_companion[j] = temp;
+                    ProjectileLevels[i].projectilesCachedComponent_companion[j] = temp.GetComponent<Projectile>();
+
+                    GameObject ef_pierce_companion = ProjectileLevels[i].projectilesCachedComponent_companion[j].pierceEffect_cached;
+                    if (ef_pierce_companion != null)
+                    {
+                        ef_pierce_companion.transform.SetParent(efCollector_companion.transform);
+                    }
+
+                    GameObject ef_hit_companion = ProjectileLevels[i].projectilesCachedComponent_companion[j].hitDieEffect_cached;
+                    if (ef_hit_companion != null)
+                    {
+                        ef_hit_companion.transform.SetParent(efCollector_companion.transform);
+                    }
+
+                    GameObject ef_range_companion = ProjectileLevels[i].projectilesCachedComponent_companion[j].rangeDieEffect_cached;
+                    if (ef_range_companion != null)
+                    {
+                        ef_range_companion.transform.SetParent(efCollector_companion.transform);
+                    }
+                }
+            }
+
+            if (efCollector.transform.childCount == 0)
+            {
+                Destroy(efCollector);
+            }
+            if (efCollector_companion.transform.childCount == 0)
+            {
+                Destroy(efCollector_companion);
             }
         }
     }

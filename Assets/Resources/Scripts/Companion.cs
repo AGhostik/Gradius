@@ -5,13 +5,11 @@ using UnityEngine;
 public class Companion : AnimatedObject {
     
     [Header("Following")]
-    public GameObject parent;
+    public Transform parentTransform;
     public float posAccuracy = 0.1f;
     public int posListLength = 20;
-
-    private float camSpeed;
-    private Transform thisTransform;
-    private Transform parentTransform;
+    
+    private Transform thisTransform;    
     private Vector3 distance;
     private Vector3 oldParentPos;
 
@@ -21,33 +19,13 @@ public class Companion : AnimatedObject {
     void Start () {
         Amination_OnStart();
         thisTransform = transform;
-        parentTransform = parent.transform;
         oldParentPos = parentTransform.position;
-        thisTransform.SetParent(Camera.main.transform);
-        takeCamSpeed(Camera.main.GetComponent<MoveCamera>().speed);
-    }
-
-    private void OnEnable()
-    {
-        EventController.UpdateCameraSpeed += takeCamSpeed;
-    }
-
-    private void OnDisable()
-    {
-        EventController.UpdateCameraSpeed -= takeCamSpeed;
     }
 
     // Update is called once per frame
     void Update () {
-        if (parent != null)
+        if (parentTransform != null)
         {
-            if (camSpeed > 0)
-            {
-                updateList();
-
-                oldParentPos += new Vector3(camSpeed * Time.deltaTime, 0, 0);
-            }
-
             followTheParent();
         }
         else
@@ -57,19 +35,6 @@ public class Companion : AnimatedObject {
 
         timerAnimation();
 	}
-
-    private void takeCamSpeed(float value)
-    {
-        camSpeed = value;
-    }
-
-    private void updateList()
-    {
-        for (int i = 0; i < posList.Count; i++)
-        {
-            posList[i] += new Vector3(camSpeed * Time.deltaTime, 0, 0);
-        }
-    }
 
     private void followTheParent()
     {

@@ -14,25 +14,18 @@ public class Explosion : MonoBehaviour {
     [Header("Animation")]
     public Sprite[] explosion = new Sprite[3];
 
-    [Header("Sound")]
-    public AudioClip Sound;
-    [Range(0f, 5f)]
-    public float volume = 1;
-
-    private int current_frame = 1;
-    private float timer_start;
+    private int currentFrame = 1;
     private float timer;
-    private SpriteRenderer render;
-    private AudioSource aud;
+    private float timerStart; 
     private Transform thisTransform;
+    private SpriteRenderer render;
 
     // Use this for initialization
     void Start () {
         thisTransform = transform;
         render = GetComponent<SpriteRenderer>();
-        aud = GetComponent<AudioSource>();
-        timer_start = TTL / explosion.Length;
-        timer = timer_start;
+        timerStart = TTL / explosion.Length;
+        timer = timerStart;
         axis *= axisMultiplier;
         changeFrame();
     }    
@@ -43,29 +36,21 @@ public class Explosion : MonoBehaviour {
         thisTransform.position += axis * Time.deltaTime;        
     }
 
-    private void playSound()
-    {
-        if (Sound != null && volume > 0)
-        {
-            aud.PlayOneShot(Sound, volume);
-        }
-    }
-
     private void Die()
     {
         timer -= Time.deltaTime;
 
         if (timer <= 0)
         {
-            if (current_frame < explosion.Length)
+            if (currentFrame < explosion.Length)
             {
-                changeFrame(current_frame);
-                current_frame++;
-                timer = timer_start;
+                changeFrame(currentFrame);
+                currentFrame++;
+                timer = timerStart;
             }
             else
             {
-                Destroy(gameObject);
+                gameObject.SetActive(false);
             }        
         }
     }

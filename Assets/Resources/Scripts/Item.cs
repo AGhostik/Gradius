@@ -18,6 +18,10 @@ public class Item : AnimatedObject {
     public GameObject object1;
     public GameObject object2;
 
+    [Header("Move (dont work yet)")]
+    [Range(0f, 5f)]
+    public float move_speed = 0;
+
     [Header("TTL")]
     public bool unlimitedTTL = false;
     public float TTL = 15;

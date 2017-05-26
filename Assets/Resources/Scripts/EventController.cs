@@ -32,12 +32,8 @@ public class EventController : MonoBehaviour
 
     public static event intMethod UpdateScores = delegate { };
     public static event floatMethod UpdateLevelProgress = delegate { };
-    public static event floatMethod UpdateCameraSpeed = delegate { };
-
-    public static event vector3Method UpdateCameraWorldPoint_TL = delegate { };
-    public static event vector3Method UpdateCameraWorldPoint_BR = delegate { };
-
-    public Camera mainCamera;
+    
+    public static Camera mainCamera;
 
     //var static
     private static List<GameObject> playerHit = new List<GameObject>();
@@ -45,8 +41,6 @@ public class EventController : MonoBehaviour
     private static int scores = 0;
     
     private static float level_progress = 0;
-
-    private static float camera_speed = 0;
 
     private static int gun1_damage = 0;
     private static int gun2_damage = 0;
@@ -57,14 +51,15 @@ public class EventController : MonoBehaviour
     private static float player_speed = 0;
     private static int player_max_health = 0;
     private static int player_current_health = 0;
+
+    private static Vector3 camera_worldPoint_TL;
+    private static Vector3 camera_worldPoint_BR;
     //end var static
 
     //var
     private int old_scores = -1;
 
     private float old_level_progress = -1;
-
-    private float old_camera_speed = -1;
 
     private int old_gun1_damage = -1;
     private int old_gun2_damage = -1;
@@ -81,13 +76,13 @@ public class EventController : MonoBehaviour
     private float input_V;
     private float old_input_H;
     private float old_input_V;
-    private Vector3 camera_worldPoint_TL;
-    private Vector3 camera_worldPoint_BR;
     //end var
 
-    private void Start()
+    private void Awake()
     {
         mainCamera = Camera.main;
+        camera_worldPoint_TL = mainCamera.ScreenToWorldPoint(new Vector3(0, 0, 0));
+        camera_worldPoint_BR = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
 
         if (Screen.fullScreen)
         {
@@ -132,9 +127,6 @@ public class EventController : MonoBehaviour
         {
             InputY();
         }
-
-        updateCameraWorldPoints();
-
         // scores
         if (old_scores != scores)
         {
@@ -206,13 +198,6 @@ public class EventController : MonoBehaviour
             UpdateLevelProgress(level_progress);
         }
 
-        // camera speed
-        if (old_camera_speed != camera_speed)
-        {
-            old_camera_speed = camera_speed;
-            UpdateCameraSpeed(camera_speed);
-        }
-
         //player hit
         if (playerHit.Count > 0)
         {
@@ -282,23 +267,17 @@ public class EventController : MonoBehaviour
         level_progress = value;
     }
 
-    public static void setCamSpeed(float value)
-    {
-        camera_speed = value;
-    }
-
     public static void playerHitAdd(GameObject obj)
     {
         playerHit.Add(obj);
     }
 
-
-    private void updateCameraWorldPoints()
+    public static Vector3 getCamPos_TL()
     {
-        camera_worldPoint_TL = mainCamera.ScreenToWorldPoint(new Vector3(0, 0, 0));
-        camera_worldPoint_BR = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
-
-        UpdateCameraWorldPoint_TL(camera_worldPoint_TL);
-        UpdateCameraWorldPoint_BR(camera_worldPoint_BR);
+        return camera_worldPoint_TL;
+    }
+    public static Vector3 getCamPos_BR()
+    {
+        return camera_worldPoint_BR;
     }
 }

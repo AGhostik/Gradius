@@ -9,44 +9,44 @@ public class Player : Destroyable {
     public float speed = 1.2f;
     public float maxSpeed = 3;
 
+    [Header("Upgrade Instantiate")]
+    public GameObject companionLevel_1;
+    public GameObject companionLevel_2;
+
     [Header("Sound")]
     public AudioClip powerUpSound;
     [Range(0f, 5f)]
     public float volumePowUp = 1;
-
     public AudioClip enemyImpactSound;
     [Range(0f, 5f)]
     public float volumeEnemyImpact = 1;
+
+    private int playerUpgradeLvl = 0;
 
     private float inputX;
     private float inputY;
     private float deltaX = 0;
     private float deltaY = 0;
-    private Vector3 pos_min;
-    private Vector3 pos_max;
-    private int player_upgrade_Lvl = 0;
-    private AudioSource player_audio;
-    private Gun player_gun1;
-    private Gun player_gun2;
 
-    void Start()
+    private Gun playerGun_1;
+    private Gun playerGun_2;
+    private Vector3 camPos_min;
+    private Vector3 camPos_max;    
+    private AudioSource playerAudio;
+    private GameObject companionLevel_1_cached;
+    private GameObject companionLevel_2_cached;    
+
+    void Awake()
     {
         Amination_OnStart();                
         Destroyable_OnStart();
 
-        player_audio = GetComponent<AudioSource>();
-        player_gun1 = thisTransform.GetChild(0).gameObject.GetComponent<Gun>();
-        player_gun2 = thisTransform.GetChild(1).gameObject.GetComponent<Gun>();
+        camPos_min = EventController.getCamPos_TL();
+        camPos_max = EventController.getCamPos_BR();
 
-        EventController.setGun1Damage(player_gun1.damageUP + player_gun1.Projectiles[player_gun1.projectile_level].GetComponent<Projectile>().damage);
-        EventController.setGun1Firerate(player_gun1.firerate);
-
-        EventController.setGun2Damage(player_gun2.damageUP + player_gun2.Projectiles[player_gun2.projectile_level].GetComponent<Projectile>().damage);
-        EventController.setGun2Firerate(player_gun2.firerate);
-
-        EventController.addPlayerCurrentHealth(health);
-        EventController.addPlayerMaxHealth(max_health);
-        EventController.addPlayerSpeed(speed);
+        playerAudio = GetComponent<AudioSource>();
+        playerGun_1 = thisTransform.GetChild(0).gameObject.GetComponent<Gun>();
+        playerGun_2 = thisTransform.GetChild(1).gameObject.GetComponent<Gun>();
     }
 
 	void Update ()
@@ -73,28 +73,38 @@ public class Player : Destroyable {
     {
         EventController.Input_Horizontal += takeInput_H;
         EventController.Input_Vertical += takeInput_V;
-        EventController.UpdateCameraWorldPoint_TL += takeCamWP_TL;
-        EventController.UpdateCameraWorldPoint_BR += takeCamWP_BR;
         EventController.PlayerGotHit += takeHit;
+        
+        if (companionLevel_1 != null)
+        {
+            companionLevel_1_cached = Instantiate(companionLevel_1);
+            companionLevel_1_cached.GetComponent<Playerghost>().player = thisTransform;            
+            companionLevel_1_cached.SetActive(false);
+        }
+        if (companionLevel_2 != null)
+        {
+            companionLevel_2_cached = Instantiate(companionLevel_2);
+            companionLevel_2_cached.GetComponent<Companion>().parentTransform = thisTransform;
+            playerGun_1.Companion = companionLevel_2_cached;
+            playerGun_2.Companion = companionLevel_2_cached;
+            companionLevel_2_cached.SetActive(false);
+        }
+
+        eventContriller_setGunDamage();
+
+        EventController.setGun1Firerate(playerGun_1.firerate);
+        EventController.setGun2Firerate(playerGun_2.firerate);
+
+        EventController.addPlayerCurrentHealth(health);
+        EventController.addPlayerMaxHealth(max_health);
+        EventController.addPlayerSpeed(speed);
     }
 
     private void OnDisable()
     {
         EventController.Input_Horizontal -= takeInput_H;
         EventController.Input_Vertical -= takeInput_V;
-        EventController.UpdateCameraWorldPoint_TL -= takeCamWP_TL;
-        EventController.UpdateCameraWorldPoint_BR -= takeCamWP_BR;
         EventController.PlayerGotHit -= takeHit;
-    }
-
-    private void takeCamWP_TL(Vector3 vector)
-    {
-        pos_min = vector;
-    }
-
-    private void takeCamWP_BR(Vector3 vector)
-    {
-        pos_max = vector;
     }
 
     private void takeInput_H(float value)
@@ -116,13 +126,13 @@ public class Player : Destroyable {
 
         if (inputX < 0)
         {
-            if (thisTransform.position.x > pos_min.x)
+            if (thisTransform.position.x > camPos_min.x)
             {
                 deltaX = inputX * Time.deltaTime;
             }
         } else
         {
-            if (thisTransform.position.x < pos_max.x)
+            if (thisTransform.position.x < camPos_max.x)
             {
                 deltaX = inputX * Time.deltaTime;
             }
@@ -130,14 +140,14 @@ public class Player : Destroyable {
 
         if (inputY < 0)
         {
-            if (thisTransform.position.y > pos_min.y)
+            if (thisTransform.position.y > camPos_min.y)
             {
                 deltaY = inputY * Time.deltaTime;
             }
         }
         else
         {
-            if (thisTransform.position.y < pos_max.y)
+            if (thisTransform.position.y < camPos_max.y)
             {
                 deltaY = inputY * Time.deltaTime;
             }
@@ -194,15 +204,14 @@ public class Player : Destroyable {
 
     private void playSound(AudioClip clip, float volume)
     {
-        if (player_audio != null)
+        if (playerAudio != null)
         {
             if (volume > 0)
             {
-                player_audio.PlayOneShot(clip, volume);
+                playerAudio.PlayOneShot(clip, volume);
             }
         }
     }
-
 
     private void playerTakeItem(Item obj)
     {
@@ -239,14 +248,6 @@ public class Player : Destroyable {
         EventController.addScore(obj.scorePoints);
     }
 
-    private void instantiateOrbital(GameObject obj, GameObject parent, Vector3 difference)
-    {
-        GameObject orbit = Instantiate(obj);
-        orbit.GetComponent<Orbital>().parent = parent;
-        orbit.transform.position = transform.position - difference;
-        orbit.transform.SetParent(parent.transform);
-    }
-
     private void item_MaxHealthUp(Item obj)
     {
         max_health += (int)obj.value;
@@ -255,80 +256,69 @@ public class Player : Destroyable {
 
     private void item_FirerateUp(Item obj)
     {
-        if (player_gun1.canFirerateUp)
+        if (playerGun_1.firerate > playerGun_1.firerateCap)
         {
-            player_gun1.firerateUp(obj.value); //EventController firerate внутри функции
+            if (playerGun_1.firerate - obj.value > playerGun_1.firerateCap)
+            {
+                playerGun_1.firerate -= obj.value;
+            }
+            else
+            {
+                playerGun_1.firerate = playerGun_1.firerateCap;
+            }
+            EventController.setGun1Firerate(playerGun_1.firerate);
         }
-
-        if (player_gun2.canFirerateUp)
+        if (playerGun_2.firerate > playerGun_2.firerateCap)
         {
-            player_gun2.firerateUp(obj.value2);//EventController firerate внутри функции
+            if (playerGun_2.firerate - obj.value > playerGun_2.firerateCap)
+            {
+                playerGun_2.firerate -= obj.value;
+            }
+            else
+            {
+                playerGun_2.firerate = playerGun_2.firerateCap;
+            }
+            EventController.setGun1Firerate(playerGun_2.firerate);
         }
     }
 
     private void item_Upgrade(Item obj)
     {
-        if (player_upgrade_Lvl == 0)
+        switch (playerUpgradeLvl)
         {
-            GameObject ghost_parent = new GameObject();
-            ghost_parent.name = "PlayerGhost";
-            ghost_parent.transform.position = transform.position;
-            ghost_parent.AddComponent<Playerghost>().player = transform;
-
-            instantiateOrbital(obj.object2, ghost_parent, new Vector3(0, 0.5f, 0));
-            instantiateOrbital(obj.object2, ghost_parent, new Vector3(0, -0.5f, 0));
-            instantiateOrbital(obj.object2, ghost_parent, new Vector3(0.5f, 0, 0));
-            instantiateOrbital(obj.object2, ghost_parent, new Vector3(-0.5f, 0, 0));
+            case 0:
+                if (companionLevel_1 != null)
+                {
+                    companionLevel_1_cached.SetActive(true);                    
+                }
+                break;
+            case 1:
+                if (companionLevel_2 != null)
+                {
+                    companionLevel_2_cached.SetActive(true);
+                }
+                break;
+            default:
+                max_health += (int)obj.value;
+                Heal((int)obj.value);
+                break;
         }
-        else
-        if (player_upgrade_Lvl == 1)
-        {
-            GameObject option = Instantiate(obj.object1);
-            option.GetComponent<Companion>().parent = gameObject;
-            player_gun1.Companions.Add(option);
-            player_gun2.Companions.Add(option);
-        }
-        else
-        {
-            max_health += (int)obj.value;
-            Heal((int)obj.value);
-        }
-        player_upgrade_Lvl++;
+        playerUpgradeLvl++;
     }
 
     private void item_GunLvLUp(Item obj)
     {
-        if (player_gun1.canUpgrade || player_gun2.canUpgrade)
+        if (playerGun_1.ProjectileLevels.Count - 1 > playerGun_1.currentProjectileLevel)
         {
-            if (player_gun1.canUpgrade && player_gun1.Projectiles[player_gun1.projectile_level] != null)
-            {
-                if (player_gun1.projectile_level < player_gun1.Projectiles.Count - 1)
-                {
-                    player_gun1.projectile_level++;
-                    EventController.playerGun1LevelUP();
-
-                    if (player_gun1.projectile_level == player_gun1.Projectiles.Count - 1)
-                    {
-                        player_gun1.canUpgrade = false;
-                    }
-                }
-                EventController.setGun1Damage(player_gun1.damageUP + player_gun1.Projectiles[player_gun1.projectile_level].GetComponent<Projectile>().damage);
-            }
-            if (player_gun2.canUpgrade && player_gun2.Projectiles[player_gun2.projectile_level] != null)
-            {
-                if (player_gun2.projectile_level < player_gun2.Projectiles.Count - 1)
-                {
-                    player_gun2.projectile_level++;
-                    EventController.playerGun2LevelUP();
-
-                    if (player_gun2.projectile_level == player_gun2.Projectiles.Count - 1)
-                    {
-                        player_gun2.canUpgrade = false;
-                    }
-                }
-                EventController.setGun2Damage(player_gun2.damageUP + player_gun2.Projectiles[player_gun2.projectile_level].GetComponent<Projectile>().damage);
-            }
-        }        
+            playerGun_1.currentProjectileLevel++;
+            EventController.playerGun1LevelUP();
+        }
+        if (playerGun_2.ProjectileLevels.Count - 1 > playerGun_2.currentProjectileLevel)
+        {
+            playerGun_2.currentProjectileLevel++;
+            EventController.playerGun2LevelUP();
+        }
+        eventContriller_setGunDamage();
     }    
 
     private void item_SpeedUp(Item obj)
@@ -357,9 +347,14 @@ public class Player : Destroyable {
 
     private void item_DamageUp(Item obj)
     {
-        player_gun1.damageUP += (int)obj.value;
-        player_gun2.damageUP += (int)obj.value2;
-        EventController.setGun1Damage(player_gun1.damageUP + player_gun1.Projectiles[player_gun1.projectile_level].GetComponent<Projectile>().damage);
-        EventController.setGun2Damage(player_gun2.damageUP + player_gun2.Projectiles[player_gun2.projectile_level].GetComponent<Projectile>().damage);
+        playerGun_1.damageUP += (int)obj.value;
+        playerGun_2.damageUP += (int)obj.value2;
+        eventContriller_setGunDamage();
+    }
+
+    private void eventContriller_setGunDamage()
+    {
+        EventController.setGun1Damage(playerGun_1.damageUP + playerGun_1.ProjectileLevels[playerGun_1.currentProjectileLevel].Projectile.GetComponent<Projectile>().damage);
+        EventController.setGun2Damage(playerGun_2.damageUP + playerGun_2.ProjectileLevels[playerGun_2.currentProjectileLevel].Projectile.GetComponent<Projectile>().damage);
     }
 }
