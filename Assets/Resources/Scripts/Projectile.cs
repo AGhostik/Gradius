@@ -15,7 +15,7 @@ public class Projectile : MonoBehaviour {
     public bool Sin = false;
     public float frequency = 1;
     public float magnitude = 1;
-    [Range(0f,1f)]
+    [Range(0f,5f)]
     public float addRandomMagnitude = 0;
 
     [Header("Animation")]
@@ -31,9 +31,10 @@ public class Projectile : MonoBehaviour {
     public GameObject pierceEffect_cached;
     public GameObject hitDieEffect_cached;
     public GameObject rangeDieEffect_cached;
-
+        
     private float ttl;
     private float ttlOld;
+    private float magnitudeNew;
     private float currentDistance;
     private Vector3 startPos;
     private Vector2 axis;
@@ -88,13 +89,15 @@ public class Projectile : MonoBehaviour {
 
         if (Sin)
         {
+            magnitudeNew = magnitude;
+
             if (addRandomMagnitude > 0)
             {
-                magnitude += Random.Range(0, addRandomMagnitude);
+                magnitudeNew += Random.Range(0, addRandomMagnitude);
             }
 
             anglePerpendicular = angle + 90;
-            axisPerpendicular = axisAngle(anglePerpendicular) * magnitude;
+            axisPerpendicular = axisAngle(anglePerpendicular) * magnitudeNew;
         }
     }
 

@@ -74,7 +74,7 @@ public class Gun : MonoBehaviour {
 
     private AudioSource gunAudio;
     
-    void Awake () {
+    void Start () {
         gunTransform = transform;
         gunAudio = GetComponent<AudioSource>();
         muzzleTransform = muzzle == null ? null : muzzle.transform;
@@ -194,8 +194,6 @@ public class Gun : MonoBehaviour {
             pj.projectilesCached[i].SetActive(true);
             playSound();
         }
-        else
-            Debug.Log("Cant create projectile");
 
         if (i < ProjectileLevels[currentProjectileLevel].projectileCount - 1)
         {
@@ -253,6 +251,7 @@ public class Gun : MonoBehaviour {
 
     private void cacheProjectiles()
     {
+        SceneObjectContainer.AddGunContainer(gameObject.name);
         int projectileArraySize = ProjectileLevels.Count;
         for (int i = 0; i < projectileArraySize; i++)
         {
@@ -268,6 +267,12 @@ public class Gun : MonoBehaviour {
             efCollector.name = ProjectileLevels[i].Projectile.name + "_ef_collection";
             efCollector_companion.name = ProjectileLevels[i].Projectile.name + "_ef_collection_companion";
 
+            pjCollector.transform.parent = SceneObjectContainer.Projectiles_gun_current.transform;
+            pjCollector_companion.transform.parent = SceneObjectContainer.Projectiles_gun_current.transform;
+            efCollector.transform.parent = SceneObjectContainer.Projectiles_gun_current.transform;
+            efCollector_companion.transform.parent = SceneObjectContainer.Projectiles_gun_current.transform;
+
+            //projectileCount calculate
             if (pauseLength == 0)
             {
                 projectileCount = (int)(tempPj.range / (tempPj.speed * firerateCap) + 0.9f);
@@ -294,6 +299,7 @@ public class Gun : MonoBehaviour {
 
             ProjectileLevels[i].projectileCount = projectileCount;
 
+            //Instantiate projectiles
             for (int j = 0; j < projectileCount; j++)
             {
                 //player
@@ -350,6 +356,7 @@ public class Gun : MonoBehaviour {
                 }
             }
 
+            //Destroy empty effect collections
             if (efCollector.transform.childCount == 0)
             {
                 Destroy(efCollector);

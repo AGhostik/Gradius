@@ -32,6 +32,8 @@ public class Fan : Destroyable
 
         camPos_min = EventController.getCamPos_TL();
         camPos_max = EventController.getCamPos_BR();
+        
+        SceneObjectContainer.AddProjectileContainer(gameObject.tag);
     }
 
     // Update is called once per frame

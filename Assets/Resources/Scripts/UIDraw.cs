@@ -19,7 +19,7 @@ public class UIDraw : MonoBehaviour {
     private string scoresStr = "Score: ";
     private string healthStr = "Health: ";
 
-    private int gun1_lvl = 0;
+   // private int gun1_lvl = 0;
    // private int upgrade_lvl = 0; 
     private int gun1_dmg;
     private int gun2_dmg;
@@ -30,8 +30,8 @@ public class UIDraw : MonoBehaviour {
     private int old_playerHealth = 0;
     private int old_playerMaxHealth = 0;
 
-    private float level_progress;
-    private float playerHealthPercent;
+    //private float level_progress;
+    //private float playerHealthPercent;
 
     private UIhelper drawer;
 
@@ -132,13 +132,13 @@ public class UIDraw : MonoBehaviour {
     //gun level
     private void takeGun1Level(int value)
     {
-        gun1_lvl = value;
+        //gun1_lvl = value;
     }
 
     //level progress
     private void takeLevelProgress(float value)
     {
-        level_progress = value;
+        //level_progress = value;
     }
 
     //health
@@ -152,7 +152,7 @@ public class UIDraw : MonoBehaviour {
     }
     private void calculateHealthPercent()
     {
-        playerHealthPercent = (float)playerHealth / playerMaxHealth * 100;
+        //playerHealthPercent = (float)playerHealth / playerMaxHealth * 100;
         healthStr = "Health: " + playerHealth;
     }
     private void updateHealth()

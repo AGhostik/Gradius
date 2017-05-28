@@ -39,6 +39,8 @@ public class Garun : Destroyable
         Amination_OnStart();
 
         camPos_min = EventController.getCamPos_TL();
+
+        SceneObjectContainer.AddProjectileContainer(gameObject.tag);
     }
 
     // Update is called once per frame

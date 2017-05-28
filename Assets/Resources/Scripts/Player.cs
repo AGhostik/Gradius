@@ -34,41 +34,21 @@ public class Player : Destroyable {
     private Vector3 camPos_max;    
     private AudioSource playerAudio;
     private GameObject companionLevel_1_cached;
-    private GameObject companionLevel_2_cached;    
+    private GameObject companionLevel_2_cached;
 
-    void Awake()
+    private void Awake()
     {
-        Amination_OnStart();                
+        Amination_OnStart();
         Destroyable_OnStart();
-
-        camPos_min = EventController.getCamPos_TL();
-        camPos_max = EventController.getCamPos_BR();
 
         playerAudio = GetComponent<AudioSource>();
         playerGun_1 = thisTransform.GetChild(0).gameObject.GetComponent<Gun>();
         playerGun_2 = thisTransform.GetChild(1).gameObject.GetComponent<Gun>();
+
+        thisTransform.parent = SceneObjectContainer.Player.transform;
+        SceneObjectContainer.AddProjectileContainer(gameObject.tag);
     }
-
-	void Update ()
-    {
-        if (old_health != health)
-        {
-            EventController.addPlayerCurrentHealth(health - old_health);            
-            old_health = health;            
-        }
-        if (old_maxHealth != max_health)
-        {
-            EventController.addPlayerMaxHealth(max_health - old_maxHealth);
-            old_maxHealth = max_health;
-        }
-
-        if (health <= 0)
-        {
-            Die();
-        }
-        flyInput();
-    }
-
+    
     private void OnEnable()
     {
         EventController.Input_Horizontal += takeInput_H;
@@ -78,13 +58,15 @@ public class Player : Destroyable {
         if (companionLevel_1 != null)
         {
             companionLevel_1_cached = Instantiate(companionLevel_1);
-            companionLevel_1_cached.GetComponent<Playerghost>().player = thisTransform;            
+            companionLevel_1_cached.GetComponent<Playerghost>().player = thisTransform;
+            companionLevel_1_cached.transform.parent = SceneObjectContainer.Player.transform;
             companionLevel_1_cached.SetActive(false);
         }
         if (companionLevel_2 != null)
         {
             companionLevel_2_cached = Instantiate(companionLevel_2);
             companionLevel_2_cached.GetComponent<Companion>().parentTransform = thisTransform;
+            companionLevel_2_cached.transform.parent = SceneObjectContainer.Player.transform;
             playerGun_1.Companion = companionLevel_2_cached;
             playerGun_2.Companion = companionLevel_2_cached;
             companionLevel_2_cached.SetActive(false);
@@ -96,8 +78,35 @@ public class Player : Destroyable {
         EventController.setGun2Firerate(playerGun_2.firerate);
 
         EventController.addPlayerCurrentHealth(health);
-        EventController.addPlayerMaxHealth(max_health);
+        EventController.addPlayerMaxHealth(maxHealth);
         EventController.addPlayerSpeed(speed);
+    }
+
+    private void Start()
+    {
+        camPos_min = EventController.getCamPos_TL();
+        camPos_max = EventController.getCamPos_BR();
+    }
+
+    void Update()
+    {
+        if (old_health != health)
+        {
+            EventController.addPlayerCurrentHealth(health - old_health);
+            old_health = health;
+        }
+        if (old_maxHealth != maxHealth)
+        {
+            EventController.addPlayerMaxHealth(maxHealth - old_maxHealth);
+            old_maxHealth = maxHealth;
+        }
+
+        if (health <= 0)
+        {
+            Die();
+        }
+
+        flyInput();
     }
 
     private void OnDisable()
@@ -250,7 +259,7 @@ public class Player : Destroyable {
 
     private void item_MaxHealthUp(Item obj)
     {
-        max_health += (int)obj.value;
+        maxHealth += (int)obj.value;
         Heal((int)obj.value);
     }
 
@@ -299,7 +308,7 @@ public class Player : Destroyable {
                 }
                 break;
             default:
-                max_health += (int)obj.value;
+                maxHealth += (int)obj.value;
                 Heal((int)obj.value);
                 break;
         }
@@ -340,7 +349,7 @@ public class Player : Destroyable {
         }
         else
         {
-            max_health += (int)obj.value2;
+            maxHealth += (int)obj.value2;
             Heal((int)obj.value2);
         }
     }
