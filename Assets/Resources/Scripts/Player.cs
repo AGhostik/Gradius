@@ -36,11 +36,13 @@ public class Player : Destroyable {
     private GameObject companionLevel_1_cached;
     private GameObject companionLevel_2_cached;
 
+    private Rigidbody2D thisRigidbody;
+
     private void Awake()
     {
         Amination_OnStart();
         Destroyable_OnStart();
-
+        thisRigidbody = GetComponent<Rigidbody2D>();
         playerAudio = GetComponent<AudioSource>();
         playerGun_1 = thisTransform.GetChild(0).gameObject.GetComponent<Gun>();
         playerGun_2 = thisTransform.GetChild(1).gameObject.GetComponent<Gun>();
@@ -103,6 +105,8 @@ public class Player : Destroyable {
 
         if (health <= 0)
         {
+            companionLevel_1_cached.SetActive(false);
+            companionLevel_2_cached.SetActive(false);
             Die();
         }
 
@@ -164,7 +168,7 @@ public class Player : Destroyable {
 
         PlayerAnimation(deltaY);
 
-        thisTransform.position += new Vector3(deltaX * speed, deltaY * speed, 0);
+        thisRigidbody.position += new Vector2(deltaX * speed, deltaY * speed);
     }
 
     private void PlayerAnimation(float vertical)
@@ -200,7 +204,8 @@ public class Player : Destroyable {
         {
             playerTakeItem(obj.GetComponent<Item>());
             playSound(powerUpSound, volumePowUp);
-            Destroy(obj);
+            //Destroy(obj);
+            obj.SetActive(false);
         }
         else
         if (obj.tag == "Enemy")

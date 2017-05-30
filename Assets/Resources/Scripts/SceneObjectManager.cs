@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SceneManager : MonoBehaviour {
+public class SceneObjectManager : MonoBehaviour {
 
+    [Header("Player")]
+    public bool immortalPlayer = false;
     public GameObject Player;
+    [Header("Enemies")]
     public GameObject Enemies;    
         
     void Awake () {
@@ -14,7 +17,11 @@ public class SceneManager : MonoBehaviour {
         if (Player != null)
         {
             SceneObjectContainer.CreatePlayerContainer();
-            Instantiate(Player);            
+            GameObject playertemp = Instantiate(Player);
+            if (immortalPlayer)
+            {
+                playertemp.GetComponent<Destroyable>().immortal = true;
+            }
         }
         if (Enemies != null)
         {

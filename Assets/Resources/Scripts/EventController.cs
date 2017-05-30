@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class EventController : MonoBehaviour
 {
@@ -83,11 +83,6 @@ public class EventController : MonoBehaviour
         mainCamera = Camera.main;
         camera_worldPoint_TL = mainCamera.ScreenToWorldPoint(new Vector3(0, 0, 0));
         camera_worldPoint_BR = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
-
-        if (Screen.fullScreen)
-        {
-            Cursor.visible = false;
-        }
     }
 
     private void Update()
@@ -97,7 +92,7 @@ public class EventController : MonoBehaviour
 
         if (Input.GetAxisRaw("Menu") != 0)
         {
-            Application.Quit();
+            SceneManager.LoadScene(0);
         }
 
         if (input_H != old_input_H)
@@ -280,4 +275,20 @@ public class EventController : MonoBehaviour
     {
         return camera_worldPoint_BR;
     }
+
+    public static void cleanAll()
+    {
+        playerHit.Clear();
+        scores = 0;
+        level_progress = 0;
+        gun1_damage = 0;
+        gun2_damage = 0;
+        gun1_firerate = 0;
+        gun2_firerate = 0;
+        gun1_level = 0;
+        gun2_level = 0;
+        player_speed = 0;
+        player_max_health = 0;
+        player_current_health = 0;
+}
 }

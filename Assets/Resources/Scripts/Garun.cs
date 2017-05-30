@@ -13,9 +13,6 @@ public class Garun : Destroyable
     public float angle = 180;
     public float frequency = 3;
     public float magnitude = 1; 
-
-    [Header("Reward")]
-    public int score = 20;
     
     private float anglePerpendicular;
     private Rigidbody2D thisRigidbody;
@@ -59,16 +56,7 @@ public class Garun : Destroyable
         {
             thisRigidbody.position = startPos;
         }
-    }
-
-    private void OnEnable()
-    {
-    }
-
-    void OnDisable()
-    {
-        EventController.addScore(score);
-    }
+    }    
 
     private Vector2 axisAngle(float alpha)
     {

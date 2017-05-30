@@ -31,7 +31,8 @@ public class Projectile : MonoBehaviour {
     public GameObject pierceEffect_cached;
     public GameObject hitDieEffect_cached;
     public GameObject rangeDieEffect_cached;
-        
+
+    private int pierceCount_new;
     private float ttl;
     private float ttlOld;
     private float magnitudeNew;
@@ -86,6 +87,7 @@ public class Projectile : MonoBehaviour {
         axis = axisAngle(angle);
         axis *= speed;
         ttl = ttlOld;
+        pierceCount_new = pierceCount;
 
         if (Sin)
         {
@@ -115,17 +117,22 @@ public class Projectile : MonoBehaviour {
 
         if (ttl <= 0)
         {
-            Die(0);
+            Die();
         }
 
         moveDirection();
 	}
 
+    private void OnBecameInvisible()
+    {
+        gameObject.SetActive(false);
+    }
+
     public void checkDie()
     {
-        if (pierceCount > 0)
+        if (pierceCount_new > 0)
         {
-            pierceCount--;
+            pierceCount_new--;
             showEffect(0);
         }
         else
@@ -139,12 +146,10 @@ public class Projectile : MonoBehaviour {
         if (Sin)
         {
             sinTransform = axisPerpendicular * (Mathf.Sin(currentDistance * frequency));
-            //thisTransform.position += (sin_transform + axis) * Time.deltaTime;
             thisRigidbody.position += (sinTransform + axis) * Time.deltaTime;
         }
         else
         {
-            //thisTransform.position += axis * Time.deltaTime;
             thisRigidbody.position += axis * Time.deltaTime;
         }
     }
@@ -165,12 +170,11 @@ public class Projectile : MonoBehaviour {
         return new Vector2(Mathf.Cos(betha), Mathf.Sin(betha));
     }
 
-    private void Die(int effectType)
+    private void Die(int effectType = -1)
     {
         // 0 - pierce, 1 - hit, 2 - range
         showEffect(effectType);
-
-        //Destroy(gameObject);
+        
         gameObject.SetActive(false);
     }
 
@@ -181,35 +185,35 @@ public class Projectile : MonoBehaviour {
         {
             case 0:
                 if (pierceEffect_cached != null)
-                {
-                    pierceEffect_cached.SetActive(true);
+                {                    
                     pierceEffect_cached.transform.position = thisTransform.position;
                     if (muteHitEffect)
                     {
                         pierceEffect_audio.mute = true;
                     }
+                    pierceEffect_cached.SetActive(true);
                 }
                 break;
             case 1:
                 if (hitDieEffect_cached != null)
-                {
-                    hitDieEffect_cached.SetActive(true);
+                {                    
                     hitDieEffect_cached.transform.position = thisTransform.position;
                     if (muteHitEffect)
                     {
                         hitDieEffect_audio.mute = true;
                     }
+                    hitDieEffect_cached.SetActive(true);
                 }
                 break;
             case 2:
                 if (rangeDieEffect_cached != null)
-                {
-                    rangeDieEffect_cached.SetActive(true);
+                {                    
                     rangeDieEffect_cached.transform.position = thisTransform.position;
                     if (muteHitEffect)
                     {
                         rangeDieEffect_audio.mute = true;
                     }
+                    rangeDieEffect_cached.SetActive(true);
                 }
                 break;
         }

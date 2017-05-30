@@ -1,17 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class UIDraw : MonoBehaviour {
 
-    //public Texture progres_border;
-    //public Texture progres_line;
-
-    //public Texture speedIcon;
-    //public List<Texture> gun1Icon;
-    //public Texture gun2Icon;
-    //public Texture upgrade1Icon;
-    //public Texture upgrade2Icon;
+    public Text FPS;
+    public Text Scores;
+    public Text Speed;
+    public Text Health;
+    public Text Gun1;
+    public Text Gun2;
 
     private string gun_damage1Str = string.Empty;
     private string gun_damage2Str = string.Empty;   
@@ -30,10 +27,13 @@ public class UIDraw : MonoBehaviour {
     private int old_playerHealth = 0;
     private int old_playerMaxHealth = 0;
 
+    private float fps;
+    private float fpsMax = 0;
+    private float fpsMin = 999;
+    private string fpsStr;
+
     //private float level_progress;
     //private float playerHealthPercent;
-
-    private UIhelper drawer;
 
     private void OnEnable()
     {
@@ -65,44 +65,31 @@ public class UIDraw : MonoBehaviour {
 
     void Start ()
     {
-        drawer = new UIhelper(256, 144);
     }
 
     void Update () {
         updateHealth();
-    }
 
-    void OnGUI()
-    {
-        //drawer.texture(progres_border).DrawProgresbar(progres_line, 2, 2, level_progress);
-        //drawer.texture(progres_border).DrawProgresbar(progres_line, 35, 2, playerHealthPercent);
-        //drawer.label(scoresStr).Draw(2, 11, 5);
-        //drawer.label(healthStr).Draw(35, 11, 5);
-
-        /*
-        drawer.texture(speedIcon).DrawAndResize(2, 109, 14, 7);
-        drawer.texture(gun1Icon[gun1_lvl]).DrawAndResize(5, 116, 7, 4);
-        drawer.texture(gun2Icon).DrawAndResize(5, 123, 7, 4);
-        drawer.texture(upgrade1Icon).DrawAndResize(2, 130, 14, 7);
-        drawer.texture(upgrade2Icon).DrawAndResize(2, 137, 14, 7);
-        */
-        drawer.label(scoresStr).Draw(2, 102, 5);
-        drawer.label(healthStr).Draw(2, 109, 5);
-        drawer.label(player_speedStr).Draw(2, 116, 5);
-        drawer.label(gun_damage1Str).Draw(2, 123, 5);
-        drawer.label(gun_damage2Str).Draw(2, 130, 5);
+        //Temp
+        fps = 1.0f / Time.deltaTime;
+        if (fpsMax < fps) fpsMax = fps;
+        if (fpsMin > fps) fpsMin = fps;
+        fpsStr = "Fps: " + fps.ToString("0.") + "\nmax: " + fpsMax.ToString("0.") + "\nmin: " + fpsMin.ToString("0.");
+        FPS.text = fpsStr;
     }
 
     //scores
     private void takeScores(int value)
     {
         scoresStr = "Score: " + value;
+        Scores.text = scoresStr;
     }
 
     //speed
     private void takeSpeed(float value)
     {
         player_speedStr = "Speed: " + value.ToString();
+        Speed.text = player_speedStr;
     }
 
     //gun damage
@@ -110,11 +97,13 @@ public class UIDraw : MonoBehaviour {
     {
         gun1_dmg = value;
         gun_damage1Str = "Dmg_1: " + gun1_dmg.ToString() + " / " + gun1_fr.ToString("0.00") + " per second";
+        Gun1.text = gun_damage1Str;
     }
     private void takeGun2Damage(int value)
     {
         gun2_dmg = value;
         gun_damage2Str = "Dmg_2: " + gun2_dmg.ToString() + " / " + gun2_fr.ToString("0.00") + " per second";
+        Gun2.text = gun_damage2Str;
     }
 
     //gun firerate
@@ -122,11 +111,13 @@ public class UIDraw : MonoBehaviour {
     {
         gun1_fr = value;
         gun_damage1Str = "Dmg_1: " + gun1_dmg.ToString() + " / " + gun1_fr.ToString("0.00") + " per second";
+        Gun1.text = gun_damage1Str;
     }
     private void takeGun2Firerate(float value)
     {
         gun2_fr = value;
         gun_damage2Str = "Dmg_2: " + gun2_dmg.ToString() + " / " + gun2_fr.ToString("0.00") + " per second";
+        Gun2.text = gun_damage2Str;
     }
 
     //gun level
@@ -153,7 +144,8 @@ public class UIDraw : MonoBehaviour {
     private void calculateHealthPercent()
     {
         //playerHealthPercent = (float)playerHealth / playerMaxHealth * 100;
-        healthStr = "Health: " + playerHealth;
+        healthStr = "Health: " + playerHealth + " / " + playerMaxHealth;
+        Health.text = healthStr;
     }
     private void updateHealth()
     {

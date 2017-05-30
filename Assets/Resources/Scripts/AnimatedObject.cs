@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class AnimatedObject : MonoBehaviour {
 
@@ -22,9 +20,9 @@ public class AnimatedObject : MonoBehaviour {
         render = gameObject.GetComponent<SpriteRenderer>();        
         timer = oneFrameTime;
     }    
-
+    
     protected void timerAnimation()
-    {
+    {        
         timer -= Time.deltaTime;
         if (timer <= 0)
         {

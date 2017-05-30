@@ -18,22 +18,33 @@ public class Explosion : MonoBehaviour {
     private float timer;
     private float timerStart; 
     private Transform thisTransform;
+    private AudioSource effectAudio;
     private SpriteRenderer render;
 
-    // Use this for initialization
-    void Start () {
+    void Awake()
+    {
         thisTransform = transform;
         render = GetComponent<SpriteRenderer>();
+        effectAudio = GetComponent<AudioSource>();
         timerStart = TTL / explosion.Length;
-        timer = timerStart;
-        axis *= axisMultiplier;
-        changeFrame();
-    }    
+    }
 
-    // Update is called once per frame
+    private void OnEnable()
+    {
+        timer = timerStart;
+        axis *= axisMultiplier;        
+        currentFrame = 1;
+        changeFrame();
+    }
+    
     void Update () {
         Die();
         thisTransform.position += axis * Time.deltaTime;        
+    }
+
+    private void OnDisable()
+    {
+        effectAudio.mute = false;
     }
 
     private void Die()

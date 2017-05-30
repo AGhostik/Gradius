@@ -6,7 +6,7 @@ About
 
 Об оригинальной игре на NES: [Wikipedia](https://ru.wikipedia.org/wiki/Gradius)
 
-Это моя попытка сделать подобие этой игры. Признаюсь, что не играл ни в какую из игр серии Gradius.
+Это игра не связана с Gradius ничем, кроме как спрайтами.
 
 Работу начал 10 мая 2017.
 
@@ -37,6 +37,4 @@ Creative Commons 0 License
 - https://www.freesound.org/people/peridactyloptrix/sounds/214990/
 - https://www.freesound.org/people/jeremysykes/sounds/341245/
 - https://www.freesound.org/people/TheDweebMan/sounds/277214/
-
-Unused:
 - https://www.freesound.org/people/cabled_mess/sounds/350988/

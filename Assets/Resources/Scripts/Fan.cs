@@ -11,9 +11,6 @@ public class Fan : Destroyable
     [Range(0f, 359f)]
     public float angle = 180;
 
-    [Header("Reward")]
-    public int score = 5;
-
     private int oldFrame;
     private Vector3 camPos_min;
     private Vector3 camPos_max;

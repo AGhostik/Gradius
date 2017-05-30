@@ -14,7 +14,10 @@ public class Destroyable : AnimatedObject {
     public List<GameObject> Drop;
     [Range(0f, 100f)]
     public List<float> Chance;
-    
+
+    [Header("Reward")]
+    public int score = 20;
+
     protected int health;
     protected Transform thisTransform;
 
@@ -68,6 +71,7 @@ public class Destroyable : AnimatedObject {
             dieEffect_cached.SetActive(true);
         }
         activateDrop();
+        EventController.addScore(score);
         gameObject.SetActive(false);
     }
 
