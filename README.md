@@ -25,7 +25,7 @@ https://github.com/AGhostik/Gradius/releases/
 Screenshot
 ------------
 
-![game screenshot](https://github.com/AGhostik/Gradius/tree/master/Assets/Screenshots/readmeScreen.png)
+![game screenshot](https://raw.githubusercontent.com/AGhostik/Gradius/master/Screenshots/readmeScreen.png)
 
 Sounds&Music
 ------------
