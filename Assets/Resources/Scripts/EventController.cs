@@ -10,67 +10,60 @@ public class EventController : MonoBehaviour
     public delegate void vector3Method(Vector3 vector);
     public delegate void gameObjectMethod(GameObject obj);
 
-    public static event voidMethod InputA = delegate { };
-    public static event voidMethod InputB = delegate { };
-    public static event voidMethod InputX = delegate { };
-    public static event voidMethod InputY = delegate { };
-
-    public static event floatMethod Input_Horizontal = delegate { };
-    public static event floatMethod Input_Vertical = delegate { };
-
+    
+    public static event intMethod UpdateScores = delegate { };
     public static event intMethod UpdatePlayerHealth = delegate { };
     public static event intMethod UpdatePlayerMaxHealth = delegate { };
     public static event intMethod UpdatePlayerGun1Damage = delegate { };
     public static event intMethod UpdatePlayerGun2Damage = delegate { };
     public static event intMethod UpdatePlayerGun1Level = delegate { };
     public static event intMethod UpdatePlayerGun2Level = delegate { };
-    public static event floatMethod UpdatePlayerGun1Firerate = delegate { };
-    public static event floatMethod UpdatePlayerGun2Firerate = delegate { };
+
+    public static event voidMethod InputA = delegate { };
+    public static event voidMethod InputB = delegate { };
+    public static event voidMethod InputX = delegate { };
+    public static event voidMethod InputY = delegate { };
+
+    public static event floatMethod Input_Vertical = delegate { };
+    public static event floatMethod Input_Horizontal = delegate { };
     public static event floatMethod UpdatePlayerSpeed = delegate { };
+    public static event floatMethod UpdateLevelProgress = delegate { };
+    public static event floatMethod UpdatePlayerGun1Firerate = delegate { };
+    public static event floatMethod UpdatePlayerGun2Firerate = delegate { }; 
 
     public static event gameObjectMethod PlayerGotHit = delegate { };
 
-    public static event intMethod UpdateScores = delegate { };
-    public static event floatMethod UpdateLevelProgress = delegate { };
-    
-    public static Camera mainCamera;
-
     //var static
-    private static List<GameObject> playerHit = new List<GameObject>();
-
-    private static int scores = 0;
+    public static Camera mainCamera;
     
-    private static float level_progress = 0;
-
-    private static int gun1_damage = 0;
-    private static int gun2_damage = 0;
-    private static float gun1_firerate = 0;
-    private static float gun2_firerate = 0;
+    private static int scores = 0;    
     private static int gun1_level = 0;
     private static int gun2_level = 0;
-    private static float player_speed = 0;
+    private static int gun1_damage = 0;
+    private static int gun2_damage = 0;
     private static int player_max_health = 0;
     private static int player_current_health = 0;
-
+    private static float player_speed = 0;
+    private static float gun1_firerate = 0;
+    private static float gun2_firerate = 0;
+    private static float level_progress = 0;
     private static Vector3 camera_worldPoint_TL;
     private static Vector3 camera_worldPoint_BR;
+    private static List<GameObject> playerHit = new List<GameObject>();    
     //end var static
 
     //var
-    private int old_scores = -1;
-
-    private float old_level_progress = -1;
-
-    private int old_gun1_damage = -1;
-    private int old_gun2_damage = -1;
-    private float old_gun1_firerate = -1;
-    private float old_gun2_firerate = -1;
+    private int old_scores = -1;    
     private int old_gun1_level = -1;
     private int old_gun2_level = -1;
-    private float old_player_speed = -1;
+    private int old_gun1_damage = -1;
+    private int old_gun2_damage = -1;    
     private int old_player_max_health = -1;
     private int old_player_current_health = -1;
-
+    private float old_player_speed = -1;
+    private float old_gun1_firerate = -1;
+    private float old_gun2_firerate = -1;
+    private float old_level_progress = -1;
 
     private float input_H;
     private float input_V;

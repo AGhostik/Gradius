@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Player : Destroyable {
 
@@ -292,7 +290,7 @@ public class Player : Destroyable {
             {
                 playerGun_2.firerate = playerGun_2.firerateCap;
             }
-            EventController.setGun1Firerate(playerGun_2.firerate);
+            EventController.setGun2Firerate(playerGun_2.firerate);
         }
     }
 

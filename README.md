@@ -20,7 +20,12 @@ Keyboard: W/A/S/D or Up/Left/Down/Right - move; z/x - shot.
 Download
 ------------
 
-[Link](https://github.com/AGhostik/Gradius/releases/)
+https://github.com/AGhostik/Gradius/releases/
+
+Screenshot
+------------
+
+![game screenshot](https://github.com/AGhostik/Gradius/tree/master/Assets/Screenshots/readmeScreen.png)
 
 Sounds&Music
 ------------

@@ -15,18 +15,12 @@ public class Projectiles
     public AudioClip shotSound;
     [Range(0f, 5f)]
     public float volume = 1;
-
-   // [HideInInspector]
+    
     public int projectileCount = 0;
-    //[HideInInspector]
     public int currentProjectileNumber = 0;
-    //[HideInInspector]
     public GameObject[] projectilesCached;
-    //[HideInInspector]
     public Projectile[] projectilesCachedComponent;
-    //[HideInInspector]
     public GameObject[] projectilesCached_companion;
-    //[HideInInspector]
     public Projectile[] projectilesCachedComponent_companion;
 }
 
@@ -39,7 +33,6 @@ public class Gun : MonoBehaviour {
 
     [Header("Start position")]
     public GameObject muzzle;
-    //[HideInInspector]
     public GameObject Companion;
 
     [Header("Stats")]
@@ -64,10 +57,10 @@ public class Gun : MonoBehaviour {
     public bool autoShot = true;
     public InputAxis input;
 
-    private int shotCount = 0;
-    private float angle = 0;           
-    private float firerateTimer = 0;
-    private float pauseTimer = 0;
+    private int shotCount;
+    private float angle;           
+    private float firerateTimer;
+    private float pauseTimer;
     
     private Transform gunTransform;
     private Transform muzzleTransform;
@@ -80,12 +73,16 @@ public class Gun : MonoBehaviour {
         muzzleTransform = muzzle == null ? null : muzzle.transform;
         angle = minAngle;
 
+        shotCount = 0;
+        firerateTimer = firerate;
+        pauseTimer = 0;
+
         cacheProjectiles();
 	}
     
     void Update () {
         updateAngle();
-
+        shotTimers();
         if (autoShot)
         {
             Shot();
@@ -219,10 +216,6 @@ public class Gun : MonoBehaviour {
                     firerateTimer = 0;
                     pauseTimer = 0;
                 }
-                else
-                {
-                    firerateTimer += Time.deltaTime;
-                }
             }
             else
             {
@@ -230,10 +223,22 @@ public class Gun : MonoBehaviour {
                 {
                     shotCount = 0;
                 }
-                else
-                {
-                    pauseTimer += Time.deltaTime;
-                }
+            }
+        }
+    }
+
+    private void shotTimers()
+    {
+        if (firerateTimer < firerate)
+        {
+            firerateTimer += Time.deltaTime;
+        }
+
+        if (shotCount >= shotsBetweenPause)
+        {
+            if (pauseTimer < pauseLength)
+            {
+                pauseTimer += Time.deltaTime;
             }
         }
     }
