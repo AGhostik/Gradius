@@ -1,126 +1,126 @@
 ﻿using UnityEngine;
 
+public enum Trajectory
+{
+    Line, Sin
+}
+public enum EffectType
+{
+    Die, Pierce
+}
+
 public class Projectile : MonoBehaviour {
 
     [Header("Stats")]
-    public int damage = 5;
-    public float range = 10;
-    public float speed = 1;
-    public int pierceCount = 0;
+    public int Damage = 5;
+    public float Range = 10;
+    public float Speed = 1;
+    public int PierceCount = 0;
+    [Range(0, 100)]
+    public float DieEffectDamagePercent = 0;
 
     [Header("Direction")]
     [Range(0f, 359f)]
-    public float angle = 0;   
-
-    public bool Sin = false;
-    public float frequency = 1;
-    public float magnitude = 1;
+    public float Angle = 0;
+    public bool RotateAlongTrajectory = true;
+    public Trajectory CurrentTrajectory;
+    public float Frequency = 1;
+    public float Magnitude = 1;
     [Range(0f,5f)]
-    public float addRandomMagnitude = 0;
+    public float MagnitudePlusMinus = 0;
 
     [Header("Animation")]
-    public GameObject pierceEffect;
-    public GameObject hitDieEffect;
-    public GameObject rangeDieEffect;
-    
-    [HideInInspector()]
-    public float anglePerpendicular;
-    [HideInInspector()]
-    public bool muteHitEffect = false;
+    public bool ShowRangeDieEffect = false;
+    public GameObject PierceEffect;
+    public GameObject DieEffect;
 
-    public GameObject pierceEffect_cached;
-    public GameObject hitDieEffect_cached;
-    public GameObject rangeDieEffect_cached;
-
+    [Header("DEBUG")]
+    public float AnglePerpendicular;
+    public bool MuteHitEffect = false;
+    public GameObject PierceEffect_cached;
+    public GameObject DieEffect_cached;
+        
     private int pierceCount_new;
-    private float ttl;
-    private float ttlOld;
+    private float TTL;
+    private float TTLOld;
+    private float sinCosRad;
     private float magnitudeNew;
     private float currentDistance;
-    private Vector3 startPos;
     private Vector2 axis;
     private Vector2 axisPerpendicular;
-    private Vector2 sinTransform;
-    private Transform thisTransform;    
+    private Vector2 SinCosTransform;
+    private Explosion pierceEffect_parameters;
+    private Explosion dieEffect_parameters;
+    private Transform thisTransform;
     private AudioSource pierceEffect_audio;
-    private AudioSource hitDieEffect_audio;
-    private AudioSource rangeDieEffect_audio;
+    private AudioSource dieEffect_audio;    
     private Rigidbody2D thisRigidbody;    
-
-    // Use this for initialization
+    
     void Awake () {
         thisTransform = transform;
         thisRigidbody = GetComponent<Rigidbody2D>();
 
-        ttlOld = speed != 0 ? range / speed : 0;        
+        TTLOld = Speed != 0 ? Range / Speed : 0;        
 
-        if (pierceEffect != null)
+        if (PierceEffect != null)
         {
-            pierceEffect_cached = Instantiate(pierceEffect);
-            pierceEffect_cached.GetComponent<Explosion>().axis = axis;
-            pierceEffect_audio = pierceEffect_cached.GetComponent<AudioSource>();
-            pierceEffect_cached.SetActive(false);
+            PierceEffect.SetActive(false);
+            PierceEffect_cached = Instantiate(PierceEffect);
+            PierceEffect_cached.GetComponent<Explosion>().axis = axis;
+            pierceEffect_parameters = PierceEffect_cached.GetComponent<Explosion>();
+            pierceEffect_audio = PierceEffect_cached.GetComponent<AudioSource>();            
         }
 
-        if (hitDieEffect != null)
+        if (DieEffect != null)
         {
-            hitDieEffect_cached = hitDieEffect != null ? Instantiate(hitDieEffect) : null;
-            hitDieEffect_cached.GetComponent<Explosion>().axis = axis;
-            hitDieEffect_audio = hitDieEffect_cached.GetComponent<AudioSource>();
-            hitDieEffect_cached.SetActive(false);
-        }
-
-        if (rangeDieEffect != null)
-        {
-            rangeDieEffect_cached = rangeDieEffect != null ? Instantiate(rangeDieEffect) : null;
-            rangeDieEffect_cached.GetComponent<Explosion>().axis = axis;
-            rangeDieEffect_audio = rangeDieEffect_cached.GetComponent<AudioSource>();
-            rangeDieEffect_cached.SetActive(false);
+            DieEffect.SetActive(false);
+            DieEffect_cached = Instantiate(DieEffect);
+            DieEffect_cached.GetComponent<Explosion>().axis = axis;
+            dieEffect_parameters = DieEffect_cached.GetComponent<Explosion>();
+            dieEffect_audio = DieEffect_cached.GetComponent<AudioSource>();            
         }
 
     }
 
     private void OnEnable()
     {
-        startPos = thisTransform.position;
-        thisTransform.localEulerAngles = new Vector3(0, 0, angle);
-        axis = axisAngle(angle);
-        axis *= speed;
-        ttl = ttlOld;
-        pierceCount_new = pierceCount;
+        thisTransform.localEulerAngles = new Vector3(0, 0, Angle);
+        axis = AngleToAxis(Angle);
+        axis *= Speed;
+        TTL = TTLOld;
+        pierceCount_new = PierceCount;
+        SinCosTransform = Vector2.zero;        
 
-        if (Sin)
+        if (CurrentTrajectory != Trajectory.Line)
         {
-            magnitudeNew = magnitude;
+            magnitudeNew = Magnitude;
 
-            if (addRandomMagnitude > 0)
+            if (MagnitudePlusMinus > 0)
             {
-                magnitudeNew += Random.Range(0, addRandomMagnitude);
+                magnitudeNew += Random.Range(-MagnitudePlusMinus, MagnitudePlusMinus);
             }
 
-            anglePerpendicular = angle + 90;
-            axisPerpendicular = axisAngle(anglePerpendicular) * magnitudeNew;
+            AnglePerpendicular = Angle + 90.0f;
+            axisPerpendicular = AngleToAxis(AnglePerpendicular) * magnitudeNew;
         }
     }
 
     private void OnDisable()
     {
-        ttl = ttlOld;
+        TTL = TTLOld;
         currentDistance = 0;
     }
 
     // Update is called once per frame
     void Update () {
-        ttl -= Time.deltaTime;
+        TTL -= Time.deltaTime;
 
-        rangeCheck();
-
-        if (ttl <= 0)
+        if (TTL <= 0)
         {
-            Die();
+            Die(ShowRangeDieEffect);
         }
 
-        moveDirection();
+        MoveDirection();
 	}
 
     private void OnBecameInvisible()
@@ -128,92 +128,89 @@ public class Projectile : MonoBehaviour {
         gameObject.SetActive(false);
     }
 
-    public void checkDie()
+    public void CheckDie()
     {
         if (pierceCount_new > 0)
         {
             pierceCount_new--;
-            showEffect(0);
+            ShowEffect(0);
         }
         else
         {
-            Die(1);
+            Die(true);
         }
     }
 
-    private void moveDirection()
+    private void MoveDirection()
     {
-        if (Sin)
+        currentDistance += Speed * Time.deltaTime;
+        switch (CurrentTrajectory)
         {
-            sinTransform = axisPerpendicular * (Mathf.Sin(currentDistance * frequency));
-            thisRigidbody.position += (sinTransform + axis) * Time.deltaTime;
-        }
-        else
-        {
-            thisRigidbody.position += axis * Time.deltaTime;
+            case Trajectory.Line:
+                thisRigidbody.position += axis * Time.deltaTime;
+                break;
+            case Trajectory.Sin:
+                sinCosRad = (Mathf.Cos(currentDistance * Frequency));
+                SinCosTransform = axisPerpendicular * sinCosRad;
+
+                if (RotateAlongTrajectory)
+                {
+                    thisTransform.localEulerAngles = new Vector3(0, 0, Mathf.Asin(sinCosRad) * Mathf.Rad2Deg);
+                }
+
+                thisRigidbody.position += (SinCosTransform + axis) * Time.deltaTime;
+                break;
         }
     }
 
-    private void rangeCheck()
-    {
-        currentDistance = Vector3.Distance(thisTransform.position, startPos);
-
-        if (currentDistance >= range)
-        {
-            Die(2);
-        }
-    }
-
-    private Vector2 axisAngle(float alpha)
+    private Vector2 AngleToAxis(float alpha)
     {
         float betha = alpha * Mathf.Deg2Rad;
         return new Vector2(Mathf.Cos(betha), Mathf.Sin(betha));
     }
 
-    private void Die(int effectType = -1)
+    private void Die(bool showDieEffect)
     {
-        // 0 - pierce, 1 - hit, 2 - range
-        showEffect(effectType);
+        if (showDieEffect)
+        {
+            ShowEffect(EffectType.Die);
+        }
         
         gameObject.SetActive(false);
     }
 
-    private void showEffect(int effecttype)
+    private void ShowEffect(EffectType effectType)
     {
-        // 0 - pierce, 1 - hit, 2 - range        
-        switch (effecttype)
+        // 0 - pierce, 1 - die        
+        switch (effectType)
         {
-            case 0:
-                if (pierceEffect_cached != null)
+            case EffectType.Pierce:
+                if (PierceEffect_cached != null)
                 {                    
-                    pierceEffect_cached.transform.position = thisTransform.position;
-                    if (muteHitEffect)
+                    PierceEffect_cached.transform.position = thisTransform.position;
+                    pierceEffect_parameters.axis = (SinCosTransform + axis);
+
+                    if (MuteHitEffect)
                     {
                         pierceEffect_audio.mute = true;
                     }
-                    pierceEffect_cached.SetActive(true);
+
+                    PierceEffect_cached.SetActive(true);
                 }
                 break;
-            case 1:
-                if (hitDieEffect_cached != null)
+            case EffectType.Die:
+                if (DieEffect_cached != null)
                 {                    
-                    hitDieEffect_cached.transform.position = thisTransform.position;
-                    if (muteHitEffect)
+                    DieEffect_cached.transform.position = thisTransform.position;
+                    dieEffect_parameters.axis = (SinCosTransform + axis);
+                    dieEffect_parameters.Damage = (int)(Damage / 100.0f * DieEffectDamagePercent);
+
+                    if (MuteHitEffect)
                     {
-                        hitDieEffect_audio.mute = true;
-                    }
-                    hitDieEffect_cached.SetActive(true);
-                }
-                break;
-            case 2:
-                if (rangeDieEffect_cached != null)
-                {                    
-                    rangeDieEffect_cached.transform.position = thisTransform.position;
-                    if (muteHitEffect)
-                    {
-                        rangeDieEffect_audio.mute = true;
-                    }
-                    rangeDieEffect_cached.SetActive(true);
+                        dieEffect_audio.mute = true;
+                    }                    
+
+                    DieEffect_cached.SetActive(true);
                 }
                 break;
         }

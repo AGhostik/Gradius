@@ -4,7 +4,7 @@ using UnityEngine;
 public class Companion : AnimatedObject {
     
     [Header("Following")]
-    public Transform parentTransform;
+    public Transform ParentTransform;
     public float posAccuracy = 0.1f;
     public int posListLength = 20;
     
@@ -13,31 +13,35 @@ public class Companion : AnimatedObject {
     private Vector3 oldParentPos;
 
     private List<Vector3> posList = new List<Vector3>();
-
-    // Use this for initialization
-    void Start () {
-        Amination_OnStart();
-        thisTransform = transform;
-        oldParentPos = parentTransform.position;
+    
+    protected override void Awake()
+    {
+        base.Awake();
+        thisTransform = transform;        
     }
 
-    // Update is called once per frame
-    void Update () {
-        if (parentTransform != null)
+    private void Start()
+    {
+        oldParentPos = ParentTransform.position;
+    }
+
+    void Update ()
+    {
+        if (ParentTransform != null)
         {
-            followTheParent();
+            FollowTheParent();
         }
         else
         {
             Destroy(gameObject);
         }
 
-        timerAnimation();
+        TimerAnimation();
 	}
 
-    private void followTheParent()
+    private void FollowTheParent()
     {
-        distance = parentTransform.position - oldParentPos;
+        distance = ParentTransform.position - oldParentPos;
 
         if (distance.magnitude >= posAccuracy)
         {
@@ -47,8 +51,8 @@ public class Companion : AnimatedObject {
                 posList.RemoveAt(0);
             }
 
-            posList.Add(parentTransform.position);
-            oldParentPos = parentTransform.position;
+            posList.Add(ParentTransform.position);
+            oldParentPos = ParentTransform.position;
         }
     }
 }

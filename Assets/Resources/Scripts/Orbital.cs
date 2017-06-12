@@ -7,21 +7,19 @@ public class Orbital : AnimatedObject
     private Transform thisTransform;
     private Transform parentTransform;
     private Vector3 rotationMask;
-
-    // Use this for initialization
-    void Start()
+    
+    protected override void Awake()
     {
-        Amination_OnStart();
+        base.Awake();
         thisTransform = transform;
         parentTransform = transform.parent.transform;
         rotationMask = new Vector3(0, 0, 1);
     }
-
-    // Update is called once per frame
+    
     void Update()
     {
         thisTransform.RotateAround(parentTransform.position, rotationMask, rotationSpeed * Time.deltaTime);
-        timerAnimation();
+        TimerAnimation();
     }
     
     private void OnTriggerEnter2D(Collider2D col)
@@ -30,8 +28,8 @@ public class Orbital : AnimatedObject
         if (hitObject.tag == "EnemyProjectile")
         {
             Projectile bullet = hitObject.GetComponent<Projectile>();
-            bullet.muteHitEffect = true;
-            bullet.checkDie();
+            bullet.MuteHitEffect = true;
+            bullet.CheckDie();
         }
     }
     

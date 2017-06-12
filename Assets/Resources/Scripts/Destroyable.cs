@@ -15,25 +15,38 @@ public class Destroyable : AnimatedObject {
     public List<float> Chance;
 
     [Header("Reward")]
-    public int score = 20;
+    public int Score = 20;
 
     protected int health;
     protected Transform thisTransform;
 
-    protected int old_health;
-    protected int old_maxHealth;
-
+    protected int oldHealth;
+    protected int oldMaxHealth;
+    
     private GameObject dieEffect_cached;
-    private List<GameObject> Drop_cached = new List<GameObject>();
+    private List<GameObject> drop_cached = new List<GameObject>();
+    
+    protected override void Awake()
+    {
+        base.Awake();
+
+        thisTransform = transform;
+        health = maxHealth;
+        oldHealth = health;
+        oldMaxHealth = maxHealth;
+
+        CreateDieEffect();
+        CreateDrop();
+    }
 
     public void Heal(int value)
-    {        
+    {
         health += value;
         if (health > maxHealth)
             health = maxHealth;
     }
 
-    public void decreaseHealth(int damage)
+    public void DecreaseHealth(int damage)
     {
         if (!immortal)
         {
@@ -48,20 +61,6 @@ public class Destroyable : AnimatedObject {
         }
     }
 
-    /// <summary>
-    /// Put in Player.OnStart
-    /// </summary>
-    protected void Destroyable_OnStart()
-    {
-        thisTransform = transform;
-        health = maxHealth;
-        old_health = health;
-        old_maxHealth = maxHealth;
-
-        createDieEffect();
-        createDrop();
-    }
-
     protected void Die()
     {        
         if (dieEffect_cached != null)
@@ -69,8 +68,8 @@ public class Destroyable : AnimatedObject {
             dieEffect_cached.transform.position = thisTransform.position;
             dieEffect_cached.SetActive(true);
         }
-        activateDrop();
-        EventController.addScore(score);
+        ActivateDrop();
+        EventController.AddScore(Score);
         gameObject.SetActive(false);
     }
 
@@ -84,7 +83,7 @@ public class Destroyable : AnimatedObject {
                 case "EnemyProjectile":
                 case "Item":
                 case "Enemy":                    
-                    EventController.playerHitAdd(hitObject);
+                    EventController.PlayerHitAdd(hitObject);
                     break;
             }
         }
@@ -93,13 +92,13 @@ public class Destroyable : AnimatedObject {
             if (hitObject.tag == "Projectile")
             {
                 Projectile bullet = hitObject.GetComponent<Projectile>();
-                decreaseHealth(bullet.damage);
-                bullet.checkDie();
+                DecreaseHealth(bullet.Damage);
+                bullet.CheckDie();
             }
         }
     }
 
-    private void createDieEffect()
+    private void CreateDieEffect()
     {
         if (dieEffect != null)
         {
@@ -109,7 +108,7 @@ public class Destroyable : AnimatedObject {
         }
     }
 
-    private void createDrop()
+    private void CreateDrop()
     {
         for (int i = 0; i < Drop.Count && i < Chance.Count; i++)
         {
@@ -118,7 +117,7 @@ public class Destroyable : AnimatedObject {
             {
                 GameObject temp = Instantiate(Drop[i], SceneObjectContainer.Items.transform);
                 temp.SetActive(false);
-                Drop_cached.Add(temp);
+                drop_cached.Add(temp);
                 if (onlyOneDrop)
                 {
                     break;
@@ -127,11 +126,11 @@ public class Destroyable : AnimatedObject {
         }
     }
 
-    private void activateDrop()
+    private void ActivateDrop()
     {
-        if (Drop_cached.Count > 0)
+        if (drop_cached.Count > 0)
         {
-            foreach (GameObject drop in Drop_cached)
+            foreach (GameObject drop in drop_cached)
             {
                 drop.transform.position = thisTransform.position;
                 drop.SetActive(true);

@@ -16,22 +16,22 @@ public class Fan : Destroyable
     private Vector2 axis;
     private Rigidbody2D thisRigidbody;
 
-    // Use this for initialization
-    void Start()
+    protected override void Awake()
     {
-        Destroyable_OnStart();
+        base.Awake();
         thisRigidbody = GetComponent<Rigidbody2D>();
+        SceneObjectContainer.AddProjectileContainer(gameObject.tag);
+
         axis = axisAngle(angle);
         move = axis * moveSpeed;
-        Amination_OnStart();
-
-        camPos_min = EventController.getCamPos_TL();
-        camPos_max = EventController.getCamPos_BR();
-        
-        SceneObjectContainer.AddProjectileContainer(gameObject.tag);
     }
-
-    // Update is called once per frame
+    
+    protected void Start()
+    {
+        camPos_min = EventController.GetCamPos_TL();
+        camPos_max = EventController.GetCamPos_BR();
+    }
+    
     void Update()
     {
         if (health <= 0)
@@ -40,7 +40,7 @@ public class Fan : Destroyable
         }
 
         thisRigidbody.position += move * Time.deltaTime;
-        timerAnimation();
+        TimerAnimation();
 
         if (thisTransform.position.x < camPos_min.x)
         {

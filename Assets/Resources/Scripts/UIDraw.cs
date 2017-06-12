@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.Text;
 
 public class UIDraw : MonoBehaviour {
+
+    #region inspector
 
     [Header("Main")]
     public Text FPS;
@@ -23,17 +26,13 @@ public class UIDraw : MonoBehaviour {
     public Text FirerateG2;
     public Sprite[] LevelsG2;
 
-    private int gun1_lvl = 0;
-    private int gun2_lvl = 0;
-    //private int upgrade_lvl = 0; 
-    private int gun1_dmg;
-    private int gun2_dmg;
-    private float gun1_fr;
-    private float gun2_fr;
+    #endregion
+
+    private int gun1_lvl;
+    private int gun2_lvl;
+
     private int playerHealth;
     private int playerMaxHealth;    
-    private int old_playerHealth = 0;
-    private int old_playerMaxHealth = 0;
 
     private bool increaseRed;
     private float healthRedColor_min;
@@ -41,41 +40,60 @@ public class UIDraw : MonoBehaviour {
     private float healthRedColor;
     private float playerHealthPercent;
 
-    private float fps;
+    #region strings
+
     private string fpsStr;
+    private string healthStr;
+    private string speedStr;
+    private string scoresStr;
+
+    private string gun1DmgStr;
+    private string gun2DmgStr;
+
+    private string gun1FrStr;
+    private string gun2FrStr;
+
+    #endregion
 
     //private float level_progress;
 
+    private void Awake()
+    {
+        gun1_lvl = 0;
+        gun2_lvl = 0;
+        SetScores(0);
+    }
+
     private void OnEnable()
     {
-        EventController.UpdatePlayerHealth += takePlayerHealth;
-        EventController.UpdatePlayerMaxHealth += takePlayerMaxHealth;        
-        EventController.UpdatePlayerGun1Damage += takeGun1Damage;
-        EventController.UpdatePlayerGun2Damage += takeGun2Damage;
-        EventController.UpdatePlayerGun1Level += takeGun1Level;
-        EventController.UpdatePlayerGun2Level += takeGun2Level;
-        EventController.UpdatePlayerGun1Firerate += takeGun1Firerate;
-        EventController.UpdatePlayerGun2Firerate += takeGun2Firerate;
-        EventController.UpdatePlayerSpeed += takeSpeed;
-        EventController.UpdateScores += takeScores;
+        EventController.UpdatePlayerHealth += SetPlayerHealth;
+        EventController.UpdatePlayerMaxHealth += SetPlayerMaxHealth;        
+        EventController.UpdatePlayerGun1Damage += SetGun1Damage;
+        EventController.UpdatePlayerGun2Damage += SetGun2Damage;
+        EventController.UpdatePlayerGun1Level += SetGun1Level;
+        EventController.UpdatePlayerGun2Level += SetGun2Level;
+        EventController.UpdatePlayerGun1Firerate += SetGun1Firerate;
+        EventController.UpdatePlayerGun2Firerate += SetGun2Firerate;
+        EventController.UpdatePlayerSpeed += SetSpeed;
+        EventController.UpdateScores += SetScores;
 
-        //EventController.UpdateLevelProgress += takeLevelProgress;
+        //EventController.UpdateLevelProgress += SetLevelProgress;
     }
 
     private void OnDisable()
     {
-        EventController.UpdatePlayerHealth -= takePlayerHealth;
-        EventController.UpdatePlayerMaxHealth -= takePlayerMaxHealth;        
-        EventController.UpdatePlayerGun1Damage -= takeGun1Damage;
-        EventController.UpdatePlayerGun2Damage -= takeGun2Damage;
-        EventController.UpdatePlayerGun1Level -= takeGun1Level;
-        EventController.UpdatePlayerGun2Level -= takeGun2Level;
-        EventController.UpdatePlayerGun1Firerate -= takeGun1Firerate;
-        EventController.UpdatePlayerGun2Firerate -= takeGun2Firerate;
-        EventController.UpdatePlayerSpeed -= takeSpeed;
-        EventController.UpdateScores -= takeScores;
+        EventController.UpdatePlayerHealth -= SetPlayerHealth;
+        EventController.UpdatePlayerMaxHealth -= SetPlayerMaxHealth;        
+        EventController.UpdatePlayerGun1Damage -= SetGun1Damage;
+        EventController.UpdatePlayerGun2Damage -= SetGun2Damage;
+        EventController.UpdatePlayerGun1Level -= SetGun1Level;
+        EventController.UpdatePlayerGun2Level -= SetGun2Level;
+        EventController.UpdatePlayerGun1Firerate -= SetGun1Firerate;
+        EventController.UpdatePlayerGun2Firerate -= SetGun2Firerate;
+        EventController.UpdatePlayerSpeed -= SetSpeed;
+        EventController.UpdateScores -= SetScores;
 
-        //EventController.UpdateLevelProgress -= takeLevelProgress;
+        //EventController.UpdateLevelProgress -= SetLevelProgress;
     }
 
     void Start ()
@@ -87,102 +105,94 @@ public class UIDraw : MonoBehaviour {
     }
 
     void Update () {
-        updateHealth();
+        HealthStrColorChange();
+    }
 
-        healthStrColorChange();
-        
-        fps = 1.0f / Time.deltaTime;
-        fpsStr = fps.ToString("0.") + " FPS";
+    private void LateUpdate()
+    {
+        fpsStr = string.Format("{0:00.0} FPS", (1.0f / Time.deltaTime));
         FPS.text = fpsStr;
     }
 
+    #region event subscribers
     //scores
-    private void takeScores(int value)
+    private void SetScores(int value)
     {
-        Scores.text = "Scores:\n" + value;
+        scoresStr = string.Format("Scores:\n{0}", value);
+        Scores.text = scoresStr;
     }
 
     //speed
-    private void takeSpeed(float value)
+    private void SetSpeed(float value)
     {
-        Speed.text = value.ToString() + " speed";
+        speedStr = string.Format("{0:0.00} speed",value);
+        Speed.text = speedStr;
+    }
+
+    //health
+    private void SetPlayerHealth(int value)
+    {
+        playerHealth = value;
+        RecheckHealth();
+    }
+    private void SetPlayerMaxHealth(int value)
+    {
+        playerMaxHealth = value;
+        RecheckHealth();
+    }
+    private void RecheckHealth()
+    {
+        playerHealthPercent = ((float)playerHealth / playerMaxHealth * 100);
+        healthStr = string.Format("{0} | {1} hp", playerMaxHealth, playerHealth);
+        Health.text = healthStr;
     }
 
     //gun damage
-    private void takeGun1Damage(int value)
+    private void SetGun1Damage(int value)
     {
-        DamageG1.text = value.ToString() + " dmg";
+        gun1DmgStr = string.Format("{0} dmg", value);
+        DamageG1.text = gun1DmgStr;
     }
-    private void takeGun2Damage(int value)
+    private void SetGun2Damage(int value)
     {
-        DamageG2.text = value.ToString() + " dmg";
+        gun2DmgStr = string.Format("{0} dmg", value);
+        DamageG2.text = gun2DmgStr;
     }
 
     //gun firerate
-    private void takeGun1Firerate(float value)
+    private void SetGun1Firerate(float value)
     {
-        FirerateG1.text = (1.0f / value).ToString("0.00") + " ps";
+        gun1FrStr = string.Format("{0:0.00} ps", (1.0f / value));
+        FirerateG1.text = gun1FrStr;
     }
-    private void takeGun2Firerate(float value)
+    private void SetGun2Firerate(float value)
     {
-        FirerateG2.text = (1.0f / value).ToString("0.00") + " ps";
+        gun2FrStr = string.Format("{0:0.00} ps", (1.0f / value));
+        FirerateG2.text = gun2FrStr;
     }
 
     //gun level
-    private void takeGun1Level(int value)
+    private void SetGun1Level()
     {
-        gun1_lvl = value;
+        gun1_lvl++;
         ImageG1.sprite = LevelsG1[gun1_lvl];
         ImageG1.rectTransform.sizeDelta = new Vector2(LevelsG1[gun1_lvl].rect.width * 2.2f, LevelsG1[gun1_lvl].rect.height * 2.2f);
     }
-    private void takeGun2Level(int value)
+    private void SetGun2Level()
     {
-        gun2_lvl = value;
+        gun2_lvl++;
         ImageG2.sprite = LevelsG2[gun2_lvl];
         ImageG2.rectTransform.sizeDelta = new Vector2(LevelsG2[gun2_lvl].rect.width * 2.8f, LevelsG2[gun2_lvl].rect.height * 2.8f);
     }
 
     //level progress
-    /*
-    private void takeLevelProgress(float value)
-    {
-        level_progress = value;
-    }
-    */
+    //private void SetLevelProgress(float value)
+    //{
+    //    level_progress = value;
+    //}
+    #endregion
 
-    //health
-    private void takePlayerHealth(int value)
-    {
-        playerHealth = value;
-    }
-    private void takePlayerMaxHealth(int value)
-    {
-        playerMaxHealth = value;
-    }
-    private void calculateHealthPercent()
-    {
-        playerHealthPercent = ((float)playerHealth / playerMaxHealth * 100);
-        Health.text = playerMaxHealth + " / " + playerHealth + " hp";
-    }
-    private void updateHealth()
-    {
-        if ((old_playerHealth != playerHealth) && (old_playerMaxHealth != playerMaxHealth))
-        {
-            calculateHealthPercent();
-        }
-        else
-        if (old_playerHealth != playerHealth)
-        {
-            calculateHealthPercent();
-        }
-        else
-        if (old_playerMaxHealth != playerMaxHealth)
-        {
-            calculateHealthPercent();
-        }
-    }
-
-    private void healthStrColorChange()
+    private void HealthStrColorChange()
     {
         if (playerHealthPercent <= 30 && playerHealthPercent > 0)
         {

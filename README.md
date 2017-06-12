@@ -43,3 +43,15 @@ Creative Commons 0 License
 - https://www.freesound.org/people/jeremysykes/sounds/341245/
 - https://www.freesound.org/people/TheDweebMan/sounds/277214/
 - https://www.freesound.org/people/cabled_mess/sounds/350988/
+- https://www.freesound.org/people/farpro/sounds/264762/
+- https://www.freesound.org/people/farpro/sounds/264763/
+- https://www.freesound.org/people/kickhat/sounds/264446/
+
+Noncommercial License
+
+- https://www.freesound.org/people/zagi2/sounds/182823/
+
+Font
+------------
+
+- http://www.fontspace.com/pixel-sagas/pixel-emulator

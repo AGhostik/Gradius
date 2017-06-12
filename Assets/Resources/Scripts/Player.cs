@@ -19,12 +19,12 @@ public class Player : Destroyable {
     [Range(0f, 5f)]
     public float volumeEnemyImpact = 1;
 
-    private int playerUpgradeLvl = 0;
+    private int playerUpgradeLvl;
 
     private float inputX;
     private float inputY;
-    private float deltaX = 0;
-    private float deltaY = 0;
+    private float deltaX;
+    private float deltaY;
 
     private Gun playerGun_1;
     private Gun playerGun_2;
@@ -36,10 +36,10 @@ public class Player : Destroyable {
 
     private Rigidbody2D thisRigidbody;
 
-    private void Awake()
+    protected override void Awake()
     {
-        Amination_OnStart();
-        Destroyable_OnStart();
+        base.Awake();
+
         thisRigidbody = GetComponent<Rigidbody2D>();
         playerAudio = GetComponent<AudioSource>();
         playerGun_1 = thisTransform.GetChild(0).gameObject.GetComponent<Gun>();
@@ -51,9 +51,9 @@ public class Player : Destroyable {
     
     private void OnEnable()
     {
-        EventController.Input_Horizontal += takeInput_H;
-        EventController.Input_Vertical += takeInput_V;
-        EventController.PlayerGotHit += takeHit;
+        EventController.Input_Horizontal += TakeInput_H;
+        EventController.Input_Vertical += TakeInput_V;
+        EventController.PlayerGotHit += TakeHit;
         
         if (companionLevel_1 != null)
         {
@@ -65,40 +65,39 @@ public class Player : Destroyable {
         if (companionLevel_2 != null)
         {
             companionLevel_2_cached = Instantiate(companionLevel_2);
-            companionLevel_2_cached.GetComponent<Companion>().parentTransform = thisTransform;
+            companionLevel_2_cached.GetComponent<Companion>().ParentTransform = thisTransform;
             companionLevel_2_cached.transform.parent = SceneObjectContainer.Player.transform;
             playerGun_1.Companion = companionLevel_2_cached;
             playerGun_2.Companion = companionLevel_2_cached;
             companionLevel_2_cached.SetActive(false);
-        }
-
-        eventContriller_setGunDamage();
-
-        EventController.setGun1Firerate(playerGun_1.firerate);
-        EventController.setGun2Firerate(playerGun_2.firerate);
-
-        EventController.addPlayerCurrentHealth(health);
-        EventController.addPlayerMaxHealth(maxHealth);
-        EventController.addPlayerSpeed(speed);
+        }        
     }
 
-    private void Start()
+    protected void Start()
     {
-        camPos_min = EventController.getCamPos_TL();
-        camPos_max = EventController.getCamPos_BR();
+        EventContriller_setGunDamage();
+
+        EventController.SetGun1Firerate(playerGun_1.firerate);
+        EventController.SetGun2Firerate(playerGun_2.firerate);
+
+        EventController.SetPlayerCurrentHealth(health);
+        EventController.SetPlayerMaxHealth(maxHealth);
+        EventController.SetPlayerSpeed(speed);
+
+        camPos_min = EventController.GetCamPos_TL();
+        camPos_max = EventController.GetCamPos_BR();
+
+        playerUpgradeLvl = 0;
+        deltaX = 0;
+        deltaY = 0;
     }
 
     void Update()
     {
-        if (old_health != health)
+        if (oldHealth != health)
         {
-            EventController.addPlayerCurrentHealth(health - old_health);
-            old_health = health;
-        }
-        if (old_maxHealth != maxHealth)
-        {
-            EventController.addPlayerMaxHealth(maxHealth - old_maxHealth);
-            old_maxHealth = maxHealth;
+            EventController.SetPlayerCurrentHealth(health);
+            oldHealth = health;
         }
 
         if (health <= 0)
@@ -108,29 +107,29 @@ public class Player : Destroyable {
             Die();
         }
 
-        flyInput();
+        FlyInput();
     }
 
     private void OnDisable()
     {
-        EventController.Input_Horizontal -= takeInput_H;
-        EventController.Input_Vertical -= takeInput_V;
-        EventController.PlayerGotHit -= takeHit;
+        EventController.Input_Horizontal -= TakeInput_H;
+        EventController.Input_Vertical -= TakeInput_V;
+        EventController.PlayerGotHit -= TakeHit;
     }
 
-    private void takeInput_H(float value)
+    private void TakeInput_H(float value)
     {
         inputX = value;
         inputX *= 3;
     }
 
-    private void takeInput_V(float value)
+    private void TakeInput_V(float value)
     {
         inputY = value;
         inputY *= 3;
     }
 
-    private void flyInput()
+    private void FlyInput()
     {
         deltaX = 0;
         deltaY = 0;
@@ -175,46 +174,46 @@ public class Player : Destroyable {
         {
             if (vertical < -0.01f)
             {
-                changeFrame(2); //DownSprite
+                ChangeFrame(2); //DownSprite
             }
             else
             if (vertical > 0.01f)
             {
-                changeFrame(0); //UpSprite
+                ChangeFrame(0); //UpSprite
             }
             else
             {
-                changeFrame(1); //NormalSprite
+                ChangeFrame(1); //NormalSprite
             }
         }
     }
 
-    private void takeHit(GameObject obj)
+    private void TakeHit(GameObject obj)
     {
         if (obj.tag == "EnemyProjectile")
         {
             Projectile bullet = obj.GetComponent<Projectile>();
-            decreaseHealth(bullet.damage);
-            bullet.checkDie();
+            DecreaseHealth(bullet.Damage);
+            bullet.CheckDie();
+            EventController.AddScore(-bullet.Damage);
         }
         else
         if (obj.tag == "Item")
         {
-            playerTakeItem(obj.GetComponent<Item>());
-            playSound(powerUpSound, volumePowUp);
-            //Destroy(obj);
+            PlayerTakeItem(obj.GetComponent<Item>());
+            PlaySound(powerUpSound, volumePowUp);
             obj.SetActive(false);
         }
         else
         if (obj.tag == "Enemy")
         {
-            decreaseHealth(35);
-            obj.GetComponent<Destroyable>().decreaseHealth(35);
-            playSound(enemyImpactSound, volumeEnemyImpact);
+            DecreaseHealth(35);
+            obj.GetComponent<Destroyable>().DecreaseHealth(35);
+            PlaySound(enemyImpactSound, volumeEnemyImpact);
         }
     }
 
-    private void playSound(AudioClip clip, float volume)
+    private void PlaySound(AudioClip clip, float volume)
     {
         if (playerAudio != null)
         {
@@ -225,7 +224,7 @@ public class Player : Destroyable {
         }
     }
 
-    private void playerTakeItem(Item obj)
+    private void PlayerTakeItem(Item obj)
     {
         switch (obj.item_type)
         {
@@ -234,39 +233,40 @@ public class Player : Destroyable {
                 break;
 
             case ItemType.DamageUP:
-                item_DamageUp(obj);
+                Item_DamageUp(obj);
                 break;
 
             case ItemType.HealthUP:
-                item_MaxHealthUp(obj);
+                Item_MaxHealthUp(obj);
                 break;
 
             case ItemType.SpeedUp:
-                item_SpeedUp(obj);
+                Item_SpeedUp(obj);
                 break;
 
             case ItemType.FirerateUp:
-                item_FirerateUp(obj);
+                Item_FirerateUp(obj);
                 break;
 
             case ItemType.GunLevelUp:
-                item_GunLvLUp(obj);
+                Item_GunLvLUp(obj);
                 break;
 
             case ItemType.Upgrade:
-                item_Upgrade(obj);
+                Item_Upgrade(obj);
                 break;
         }
-        EventController.addScore(obj.scorePoints);
+        EventController.AddScore(obj.scorePoints);
     }
 
-    private void item_MaxHealthUp(Item obj)
+    private void Item_MaxHealthUp(Item obj)
     {
         maxHealth += (int)obj.value;
         Heal((int)obj.value);
+        EventController.SetPlayerMaxHealth(maxHealth);
     }
 
-    private void item_FirerateUp(Item obj)
+    private void Item_FirerateUp(Item obj)
     {
         if (playerGun_1.firerate > playerGun_1.firerateCap)
         {
@@ -278,23 +278,23 @@ public class Player : Destroyable {
             {
                 playerGun_1.firerate = playerGun_1.firerateCap;
             }
-            EventController.setGun1Firerate(playerGun_1.firerate);
+            EventController.SetGun1Firerate(playerGun_1.firerate);
         }
         if (playerGun_2.firerate > playerGun_2.firerateCap)
         {
-            if (playerGun_2.firerate - obj.value > playerGun_2.firerateCap)
+            if (playerGun_2.firerate - obj.value2 > playerGun_2.firerateCap)
             {
-                playerGun_2.firerate -= obj.value;
+                playerGun_2.firerate -= obj.value2;
             }
             else
             {
                 playerGun_2.firerate = playerGun_2.firerateCap;
             }
-            EventController.setGun2Firerate(playerGun_2.firerate);
+            EventController.SetGun2Firerate(playerGun_2.firerate);
         }
     }
 
-    private void item_Upgrade(Item obj)
+    private void Item_Upgrade(Item obj)
     {
         switch (playerUpgradeLvl)
         {
@@ -318,22 +318,22 @@ public class Player : Destroyable {
         playerUpgradeLvl++;
     }
 
-    private void item_GunLvLUp(Item obj)
+    private void Item_GunLvLUp(Item obj)
     {
         if (playerGun_1.ProjectileLevels.Count - 1 > playerGun_1.currentProjectileLevel)
         {
             playerGun_1.currentProjectileLevel++;
-            EventController.playerGun1LevelUP();
+            EventController.PlayerGun1LevelUP();
         }
         if (playerGun_2.ProjectileLevels.Count - 1 > playerGun_2.currentProjectileLevel)
         {
             playerGun_2.currentProjectileLevel++;
-            EventController.playerGun2LevelUP();
+            EventController.PlayerGun2LevelUP();
         }
-        eventContriller_setGunDamage();
+        EventContriller_setGunDamage();
     }    
 
-    private void item_SpeedUp(Item obj)
+    private void Item_SpeedUp(Item obj)
     {
         Player player = thisTransform.GetComponent<Player>();
         if (player.speed < player.maxSpeed)
@@ -341,14 +341,13 @@ public class Player : Destroyable {
             float speed_diff = player.maxSpeed - player.speed;
             if (speed_diff >= obj.value)
             {
-                player.speed += obj.value;
-                EventController.addPlayerSpeed(obj.value);
+                player.speed += obj.value;                
             }
             else
             {
                 player.speed += speed_diff;
-                EventController.addPlayerSpeed(speed_diff);
             }
+            EventController.SetPlayerSpeed(player.speed);
         }
         else
         {
@@ -357,16 +356,16 @@ public class Player : Destroyable {
         }
     }
 
-    private void item_DamageUp(Item obj)
+    private void Item_DamageUp(Item obj)
     {
         playerGun_1.damageUP += (int)obj.value;
         playerGun_2.damageUP += (int)obj.value2;
-        eventContriller_setGunDamage();
+        EventContriller_setGunDamage();
     }
 
-    private void eventContriller_setGunDamage()
+    private void EventContriller_setGunDamage()
     {
-        EventController.setGun1Damage(playerGun_1.damageUP + playerGun_1.ProjectileLevels[playerGun_1.currentProjectileLevel].Projectile.GetComponent<Projectile>().damage);
-        EventController.setGun2Damage(playerGun_2.damageUP + playerGun_2.ProjectileLevels[playerGun_2.currentProjectileLevel].Projectile.GetComponent<Projectile>().damage);
+        EventController.SetGun1Damage(playerGun_1.damageUP + playerGun_1.ProjectileLevels[playerGun_1.currentProjectileLevel].Projectile.GetComponent<Projectile>().Damage);
+        EventController.SetGun2Damage(playerGun_2.damageUP + playerGun_2.ProjectileLevels[playerGun_2.currentProjectileLevel].Projectile.GetComponent<Projectile>().Damage);
     }
 }

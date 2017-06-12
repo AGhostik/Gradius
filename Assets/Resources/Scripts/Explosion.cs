@@ -1,38 +1,42 @@
 ﻿using UnityEngine;
 
-public class Explosion : MonoBehaviour {
+public class Explosion : AnimatedObject {
+
+    [Header("Explosion")]
+    public int Damage = 0;
+    public float Radius = 1;
 
     [Header("Move")]    
     public float axisMultiplier = 0.5f;
     public Vector3 axis = new Vector3(1, 0, 0);
-
-    [Header("Time To Live")]
-    public float TTL = 0.3f;
-
-    [Header("Animation")]
-    public Sprite[] explosion = new Sprite[3];
-
-    private int currentFrame = 1;
-    private float timer;
-    private float timerStart; 
+    
     private Transform thisTransform;
     private AudioSource effectAudio;
-    private SpriteRenderer render;
 
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         thisTransform = transform;
-        render = GetComponent<SpriteRenderer>();
         effectAudio = GetComponent<AudioSource>();
-        timerStart = TTL / explosion.Length;
+
+        ChangeFrame();
+
+        if (Damage > 0 && Radius > 0)
+            thisTransform.localScale = new Vector2(Radius*2 / render.sprite.bounds.size.x, Radius*2 / render.sprite.bounds.size.y);
     }
 
     private void OnEnable()
     {
-        timer = timerStart;
+        timer = oneFrameTime;
         axis *= axisMultiplier;        
-        currentFrame = 1;
-        changeFrame();
+        currentFrame = 0;
+        ChangeFrame();
+
+        if (Damage > 0 && Radius > 0)
+        {
+            ExplosionDamage();
+        }
     }
     
     void Update () {
@@ -51,11 +55,11 @@ public class Explosion : MonoBehaviour {
 
         if (timer <= 0)
         {
-            if (currentFrame < explosion.Length)
+            if (currentFrame < framesLength)
             {
-                changeFrame(currentFrame);
+                ChangeFrame(currentFrame);
                 currentFrame++;
-                timer = timerStart;
+                timer = oneFrameTime;
             }
             else
             {
@@ -64,8 +68,15 @@ public class Explosion : MonoBehaviour {
         }
     }
 
-    private void changeFrame(int frame_number = 0)
+    private void ExplosionDamage()
     {
-        render.sprite = explosion[frame_number];
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(thisTransform.position, Radius);
+        foreach (Collider2D victim in hitColliders)
+        {
+            if (victim.tag == "Enemy" || victim.tag == "Player")
+            {
+                victim.GetComponent<Destroyable>().DecreaseHealth(Damage);
+            }
+        }
     }
 }

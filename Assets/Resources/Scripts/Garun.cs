@@ -20,24 +20,24 @@ public class Garun : Destroyable
     private Vector2 move;
     private Vector2 axis;
 
-    // Use this for initialization
-    void Start()
+    protected override void Awake()
     {
-        Destroyable_OnStart();
+        base.Awake();
+
         thisRigidbody = GetComponent<Rigidbody2D>();
-        startPos = thisTransform.position;
-        anglePerpendicular = angle + 90;
+        SceneObjectContainer.AddProjectileContainer(gameObject.tag);
+
+        anglePerpendicular = angle + 90.0f;
         axis = axisAngle(angle);
         move = axis * moveSpeed;
-        
-        Amination_OnStart();
-
-        camPos_min = EventController.getCamPos_TL();
-
-        SceneObjectContainer.AddProjectileContainer(gameObject.tag);
     }
-
-    // Update is called once per frame
+    
+    void Start()
+    {        
+        startPos = thisTransform.position;
+        camPos_min = EventController.GetCamPos_TL();        
+    }
+    
     void Update()
     {
         if (health <= 0)
@@ -47,7 +47,7 @@ public class Garun : Destroyable
 
         sinTransform = axisAngle(anglePerpendicular) * (Mathf.Sin(frequency * Vector3.Distance(startPos, thisTransform.position))) * magnitude;
         thisRigidbody.position += (sinTransform + move) * Time.deltaTime;
-        timerAnimation();
+        TimerAnimation();
 
         if (thisTransform.position.x < camPos_min.x)
         {
